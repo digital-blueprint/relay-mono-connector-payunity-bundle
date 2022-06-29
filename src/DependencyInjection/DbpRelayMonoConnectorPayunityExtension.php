@@ -26,7 +26,7 @@ class DbpRelayMonoConnectorPayunityExtension extends ConfigurableExtension
         $loader->load('services.yaml');
 
         $definition = $container->getDefinition(PayunityFlexService::class);
-        $definition->addMethodCall('setConfig', [$mergedConfig ?? []]);
+        $definition->addMethodCall('setConfig', [$mergedConfig]);
     }
 
     public function prepend(ContainerBuilder $container)
