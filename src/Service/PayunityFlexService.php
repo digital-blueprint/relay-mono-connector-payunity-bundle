@@ -8,8 +8,8 @@ use Dbp\Relay\MonoBundle\Entity\PaymentPersistence;
 use Dbp\Relay\MonoBundle\PaymentServiceProvider\StartResponse;
 use Dbp\Relay\MonoBundle\PaymentServiceProvider\StartResponseInterface;
 use Dbp\Relay\MonoBundle\Service\PaymentServiceProviderServiceInterface;
-use Dbp\Relay\MonoConnectorPayunityBundle\Api\PaymentData;
 use Dbp\Relay\MonoConnectorPayunityBundle\Api\Connection;
+use Dbp\Relay\MonoConnectorPayunityBundle\Api\PaymentData;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\ResponseInterface;
 
@@ -32,13 +32,11 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface
 
     public function __construct(
         PaymentDataService $paymentDataService
-    )
-    {
+    ) {
         $this->paymentDataService = $paymentDataService;
     }
 
     /**
-     * @param array $config
      * @return void
      */
     public function setConfig(array $config)
@@ -49,7 +47,7 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface
     public function start(PaymentPersistence &$payment): StartResponseInterface
     {
         $body = [
-            'amount' => number_format((float)$payment->getAmount(), 2),
+            'amount' => number_format((float) $payment->getAmount(), 2),
             'currency' => $payment->getCurrency(),
             'paymentType' => 'CD',
         ];
@@ -114,7 +112,7 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface
                 ]
             );
             $paymentData = $this->parsePaymentDataResponse($response);
-        }  catch (RequestException $e) {
+        } catch (RequestException $e) {
         }
 
         return $paymentData;

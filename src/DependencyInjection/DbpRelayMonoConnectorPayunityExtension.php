@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Dbp\Relay\MonoConnectorPayunityBundle\DependencyInjection;
 
 use Dbp\Relay\CoreBundle\Extension\ExtensionTrait;
-use Dbp\Relay\MonoConnectorPayunityBundle\Service\PaymentDataService;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityFlexService;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
