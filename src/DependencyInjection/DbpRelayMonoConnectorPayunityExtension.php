@@ -51,7 +51,7 @@ class DbpRelayMonoConnectorPayunityExtension extends ConfigurableExtension imple
             ],
             'orm' => [
                 'entity_managers' => [
-                    'dbp_relay_mono_connector_payunity' => [
+                    'dbp_relay_mono_connector_payunity_bundle' => [
                         'naming_strategy' => 'doctrine.orm.naming_strategy.underscore_number_aware',
                         'connection' => 'dbp_relay_mono_connector_payunity',
                         'mappings' => [
