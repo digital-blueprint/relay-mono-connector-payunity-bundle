@@ -22,7 +22,7 @@ class PaymentDataService
     public function __construct(
         ManagerRegistry $managerRegistry
     ) {
-        $manager = $managerRegistry->getManager('dbp_relay_mono_connector_payunity');
+        $manager = $managerRegistry->getManager('dbp_relay_mono_connector_payunity_bundle');
         assert($manager instanceof EntityManagerInterface);
         $this->em = $manager;
     }

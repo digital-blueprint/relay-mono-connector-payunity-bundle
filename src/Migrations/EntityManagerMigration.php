@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 abstract class EntityManagerMigration extends AbstractMigration implements ContainerAwareInterface
 {
-    private const EM_NAME = 'dbp_relay_mono_connector_payunity';
+    private const EM_NAME = 'dbp_relay_mono_connector_payunity_bundle';
 
     /** @var ContainerInterface */
     protected $container;
