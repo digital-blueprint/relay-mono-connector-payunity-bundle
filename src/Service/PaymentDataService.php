@@ -37,7 +37,7 @@ class PaymentDataService
             $this->em->persist($paymentDataPersistence);
             $this->em->flush();
         } catch (\Exception $e) {
-            throw ApiError::withDetails(Response::HTTP_INTERNAL_SERVER_ERROR, 'Payment could not be created!', 'mono:payment-not-created', ['message' => $e->getMessage()]);
+            throw ApiError::withDetails(Response::HTTP_INTERNAL_SERVER_ERROR, 'Payment data could not be created!', 'mono:payment-data-not-created', ['message' => $e->getMessage()]);
         }
 
         return $paymentData;
@@ -45,5 +45,19 @@ class PaymentDataService
 
     public function getByPaymentIdentifier(string $paymentIdentifier)
     {
+        /** @var PaymentDataPersistence $paymentDataPersistence */
+        $paymentDataPersistence = $this->em
+            ->getRepository(PaymentDataPersistence::class)
+            ->findOneBy([
+                'paymentIdentifier' => $paymentIdentifier,
+            ], [
+                'createdAt' => 'DESC',
+            ]);
+
+        if (!$paymentDataPersistence) {
+            throw ApiError::withDetails(Response::HTTP_NOT_FOUND, 'Payment data was not found!', 'mono:payment-data-not-found');
+        }
+
+        return $paymentDataPersistence;
     }
 }

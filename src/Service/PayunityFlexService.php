@@ -5,13 +5,17 @@ declare(strict_types=1);
 namespace Dbp\Relay\MonoConnectorPayunityBundle\Service;
 
 use Dbp\Relay\MonoBundle\Entity\PaymentPersistence;
+use Dbp\Relay\MonoBundle\PaymentServiceProvider\CompleteResponse;
+use Dbp\Relay\MonoBundle\PaymentServiceProvider\CompleteResponseInterface;
 use Dbp\Relay\MonoBundle\PaymentServiceProvider\StartResponse;
 use Dbp\Relay\MonoBundle\PaymentServiceProvider\StartResponseInterface;
 use Dbp\Relay\MonoBundle\Service\PaymentServiceProviderServiceInterface;
 use Dbp\Relay\MonoConnectorPayunityBundle\Api\Connection;
 use Dbp\Relay\MonoConnectorPayunityBundle\Api\PaymentData;
 use GuzzleHttp\Exception\RequestException;
+use League\Uri\UriTemplate;
 use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\HttpFoundation\UrlHelper;
 
 class PayunityFlexService implements PaymentServiceProviderServiceInterface
 {
@@ -30,10 +34,17 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface
      */
     private $paymentDataService;
 
+    /**
+     * @var UrlHelper
+     */
+    private $urlHelper;
+
     public function __construct(
-        PaymentDataService $paymentDataService
+        PaymentDataService $paymentDataService,
+        UrlHelper $urlHelper
     ) {
         $this->paymentDataService = $paymentDataService;
+        $this->urlHelper = $urlHelper;
     }
 
     /**
@@ -56,10 +67,8 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface
         $paymentData = $this->postPaymentData($contract, $body);
         $this->paymentDataService->createPaymentData($payment, $paymentData);
 
-        $widgetUrl = '';
-        $data = json_encode([
-            'id' => $paymentData->getId(),
-        ]);
+        $widgetUrl = $this->getWidgetUrl($payment, $paymentData);
+        $data = null;
         $error = null;
 
         $startResponse = new StartResponse(
@@ -111,14 +120,86 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface
                     'form_params' => $data,
                 ]
             );
-            $paymentData = $this->parsePaymentDataResponse($response);
+            $paymentData = $this->parsePostPaymentDataResponse($response);
         } catch (RequestException $e) {
         }
 
         return $paymentData;
     }
 
-    private function parsePaymentDataResponse(ResponseInterface $response): PaymentData
+    private function parsePostPaymentDataResponse(ResponseInterface $response): PaymentData
+    {
+        $json = (string) $response->getBody();
+        $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+
+        $paymentData = new PaymentData();
+        $paymentData->fromJsonResponse($data);
+
+        return $paymentData;
+    }
+
+    private function getWidgetUrl(PaymentPersistence $payment, PaymentData $paymentData): string
+    {
+        $contract = $payment->getPaymentContract();
+        $method = $payment->getPaymentMethod();
+        $contractConfig = $this->config['payment_contracts'][$contract];
+        $config = $contractConfig['payment_methods_to_widgets'][$method];
+
+        $shopperResultUrl = $payment->getReturnUrl();
+        $brands = $config['brands'];
+        $checkoutId = $paymentData->getId();
+        $scriptSrc = $contractConfig['api_url'] . '/v1/paymentWidgets.js?checkoutId=' . $checkoutId;
+        $pspData = null;
+        $pspError = null;
+
+        $uriTemplate = new UriTemplate($config['widget_url']);
+        $uri = (string) $uriTemplate->expand([
+            'shopperResultUrl' => $shopperResultUrl,
+            'brands' => $brands,
+            'scriptSrc' => $scriptSrc,
+            'pspData' => $pspData,
+            'pspError' => $pspError,
+        ]);
+        $uri = $this->urlHelper->getAbsoluteUrl($uri);
+
+        return $uri;
+    }
+
+    public function complete(PaymentPersistence &$payment, string $pspData): CompleteResponseInterface
+    {
+        $contract = $payment->getPaymentContract();
+        $paymentDataPersisted = $this->paymentDataService->getByPaymentIdentifier($payment->getIdentifier());
+
+        $paymentData = $this->getPaymentData($contract, $paymentDataPersisted->getPspIdentifier());
+
+        $completeResponse = new CompleteResponse($payment->getReturnUrl());
+
+        return $completeResponse;
+    }
+
+    private function getPaymentData(string $contract, string $id): ?PaymentData
+    {
+        $paymentData = null;
+
+        $connection = $this->getConnectionByContract($contract);
+        $client = $connection->getClient();
+
+        $uriTemplate = new UriTemplate('/v1/checkouts/{id}/payment');
+        $uri = (string) $uriTemplate->expand([
+            'id' => $id
+        ]);
+        try {
+            $response = $client->get(
+                $uri
+            );
+            $paymentData = $this->parseGetPaymentDataResponse($response);
+        } catch (RequestException $e) {
+        }
+
+        return $paymentData;
+    }
+
+    private function parseGetPaymentDataResponse(ResponseInterface $response): PaymentData
     {
         $json = (string) $response->getBody();
         $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
