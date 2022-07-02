@@ -148,7 +148,7 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface
         $shopperResultUrl = $payment->getReturnUrl();
         $brands = $config['brands'];
         $checkoutId = $paymentData->getId();
-        $scriptSrc = $contractConfig['api_url'] . '/v1/paymentWidgets.js?checkoutId=' . $checkoutId;
+        $scriptSrc = $contractConfig['api_url'].'/v1/paymentWidgets.js?checkoutId='.$checkoutId;
         $pspData = null;
         $pspError = null;
 
@@ -186,7 +186,7 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface
 
         $uriTemplate = new UriTemplate('/v1/checkouts/{id}/payment');
         $uri = (string) $uriTemplate->expand([
-            'id' => $id
+            'id' => $id,
         ]);
         try {
             $response = $client->get(
