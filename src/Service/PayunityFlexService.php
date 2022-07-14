@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\MonoConnectorPayunityBundle\Service;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
+use Dbp\Relay\MonoBundle\Entity\Payment;
 use Dbp\Relay\MonoBundle\Entity\PaymentPersistence;
 use Dbp\Relay\MonoBundle\PaymentServiceProvider\CompleteResponse;
 use Dbp\Relay\MonoBundle\PaymentServiceProvider\CompleteResponseInterface;
@@ -173,23 +174,71 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface
         $contract = $payment->getPaymentContract();
         $paymentDataPersisted = $this->paymentDataService->getByPaymentIdentifier($payment->getIdentifier());
 
-        $paymentData = $this->getPaymentData($contract, $paymentDataPersisted->getPspIdentifier());
+        $paymentData = $this->getCheckoutPaymentData($contract, $paymentDataPersisted->getPspIdentifier());
+        //$paymentData = $this->getQueryPaymentData($contract, $paymentDataPersisted->getPspIdentifier());
+
+        // https://payunity.docs.oppwa.com/reference/resultCodes
+        $code = $paymentData->getCode();
+        if (
+            preg_match('/^(000\.000\.|000\.100\.1|000\.[36])/', $code)
+            || preg_match('/^(000\.400\.0[^3]|000\.400\.[0-1]{2}0)/', $code)
+        ) {
+            $payment->setPaymentStatus(Payment::PAYMENT_STATUS_COMPLETED);
+            $completedAt = new \DateTime();
+            $payment->setCompletedAt($completedAt);
+        } elseif (
+            preg_match('/^(000\.200)/', $code)
+            || preg_match('/^(800\.400\.5|100\.400\.500)/', $code)
+        ) {
+            $payment->setPaymentStatus(Payment::PAYMENT_STATUS_PENDING);
+        } else {
+            $payment->setPaymentStatus(Payment::PAYMENT_STATUS_FAILED);
+        }
 
         $completeResponse = new CompleteResponse($payment->getReturnUrl());
 
         return $completeResponse;
     }
 
-    private function getPaymentData(string $contract, string $id): ?PaymentData
+    private function getCheckoutPaymentData(string $contract, string $id): ?PaymentData
     {
         $paymentData = null;
 
         $connection = $this->getConnectionByContract($contract);
         $client = $connection->getClient();
 
-        $uriTemplate = new UriTemplate('/v1/checkouts/{id}/payment');
+        $entityId = $connection->getEntityId();
+
+        $uriTemplate = new UriTemplate('/v1/checkouts/{id}/payment?entityId={entityId}');
         $uri = (string) $uriTemplate->expand([
             'id' => $id,
+            'entityId' => $entityId,
+        ]);
+        try {
+            $response = $client->get(
+                $uri
+            );
+            $paymentData = $this->parseGetPaymentDataResponse($response);
+        } catch (RequestException $e) {
+            throw ApiError::withDetails(Response::HTTP_INTERNAL_SERVER_ERROR, 'Communication error with payment service provider!', 'mono:psp-communication-error', ['message' => $e->getMessage()]);
+        }
+
+        return $paymentData;
+    }
+
+    private function getQueryPaymentData(string $contract, string $id): ?PaymentData
+    {
+        $paymentData = null;
+
+        $connection = $this->getConnectionByContract($contract);
+        $client = $connection->getClient();
+
+        $entityId = $connection->getEntityId();
+
+        $uriTemplate = new UriTemplate('/v1/query/{id}?entityId={entityId}');
+        $uri = (string) $uriTemplate->expand([
+            'id' => $id,
+            'entityId' => $entityId,
         ]);
         try {
             $response = $client->get(
