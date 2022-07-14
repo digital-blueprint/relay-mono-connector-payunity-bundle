@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\MonoConnectorPayunityBundle\Service;
 
+use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\MonoBundle\Entity\PaymentPersistence;
 use Dbp\Relay\MonoBundle\PaymentServiceProvider\CompleteResponse;
 use Dbp\Relay\MonoBundle\PaymentServiceProvider\CompleteResponseInterface;
@@ -15,6 +16,7 @@ use Dbp\Relay\MonoConnectorPayunityBundle\Api\PaymentData;
 use GuzzleHttp\Exception\RequestException;
 use League\Uri\UriTemplate;
 use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\UrlHelper;
 
 class PayunityFlexService implements PaymentServiceProviderServiceInterface
@@ -122,6 +124,7 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface
             );
             $paymentData = $this->parsePostPaymentDataResponse($response);
         } catch (RequestException $e) {
+            throw ApiError::withDetails(Response::HTTP_INTERNAL_SERVER_ERROR, 'Communication error with payment service provider!', 'mono:psp-communication-error', ['message' => $e->getMessage()]);
         }
 
         return $paymentData;
@@ -194,6 +197,7 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface
             );
             $paymentData = $this->parseGetPaymentDataResponse($response);
         } catch (RequestException $e) {
+            throw ApiError::withDetails(Response::HTTP_INTERNAL_SERVER_ERROR, 'Communication error with payment service provider!', 'mono:psp-communication-error', ['message' => $e->getMessage()]);
         }
 
         return $paymentData;
