@@ -240,14 +240,8 @@
             "version": "dev-main",
             "source": {
                 "type": "git",
-                "url": "https://gitlab.tugraz.at/dbp/mono/dbp-relay-mono-bundle.git",
-                "reference": "a13b5a14e4800931d8550e39f7fb96856ebf7e01"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://gitlab.tugraz.at/api/v4/projects/dbp%2Fmono%2Fdbp-relay-mono-bundle/repository/archive.zip?sha=a13b5a14e4800931d8550e39f7fb96856ebf7e01",
-                "reference": "a13b5a14e4800931d8550e39f7fb96856ebf7e01",
-                "shasum": ""
+                "url": "git@gitlab.tugraz.at:dbp/mono/dbp-relay-mono-bundle.git",
+                "reference": "ef79a3b9a639f4615857afbf7fd10f7838578a01"
             },
             "require": {
                 "api-platform/core": "^2.6",
@@ -310,11 +304,7 @@
                 "AGPL-3.0-or-later"
             ],
             "description": "A template bundle for the Relay API gateway",
-            "support": {
-                "source": "https://gitlab.tugraz.at/dbp/mono/dbp-relay-mono-bundle/-/tree/main",
-                "issues": "https://gitlab.tugraz.at/dbp/mono/dbp-relay-mono-bundle/-/issues"
-            },
-            "time": "2022-07-04T02:17:37+02:00"
+            "time": "2022-07-14T07:09:16+00:00"
         },
         {
             "name": "doctrine/annotations",
@@ -9418,16 +9408,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.8.0",
+            "version": "1.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "b7648d4ee9321665acaf112e49da9fd93df8fbd5"
+                "reference": "8dbba631fa32f4b289404469c2afd6122fd61d67"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/b7648d4ee9321665acaf112e49da9fd93df8fbd5",
-                "reference": "b7648d4ee9321665acaf112e49da9fd93df8fbd5",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/8dbba631fa32f4b289404469c2afd6122fd61d67",
+                "reference": "8dbba631fa32f4b289404469c2afd6122fd61d67",
                 "shasum": ""
             },
             "require": {
@@ -9453,7 +9443,7 @@
             "description": "PHPStan - PHP Static Analysis Tool",
             "support": {
                 "issues": "https://github.com/phpstan/phpstan/issues",
-                "source": "https://github.com/phpstan/phpstan/tree/1.8.0"
+                "source": "https://github.com/phpstan/phpstan/tree/1.8.1"
             },
             "funding": [
                 {
@@ -9473,7 +9463,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-06-29T08:53:31+00:00"
+            "time": "2022-07-12T16:08:06+00:00"
         },
         {
             "name": "phpstan/phpstan-phpunit",
@@ -11826,5 +11816,5 @@
     "platform-overrides": {
         "php": "7.3"
     },
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.0.0"
 }
