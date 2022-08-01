@@ -55,7 +55,7 @@ class Widget extends AbstractController
 
     public function index(Request $request): Response
     {
-        $identifier = $request->query->get('identifier');
+        $identifier = (string) $request->query->get('identifier');
         $payment = $this->paymentService->getPaymentPersistenceByIdentifier($identifier);
 
         $contract = $payment->getPaymentContract();
