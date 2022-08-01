@@ -55,6 +55,17 @@ dbp_relay_mono_connector_payunity:
           brands: 'GOOGLEPAY'
 ```
 
+Add widget route to `config/routes/dbp_route.yaml`:
+
+```yaml
+DbpRelayCoreBundle:
+    resource: "@DbpRelayCoreBundle/Resources/config/routing.yaml"
+# [...]
+DbpRelayMonoConnectorPayunityBundle:
+    resource: "@DbpRelayMonoConnectorPayunityBundle/Resources/config/routing.yaml"
+# [...]
+```
+
 For more info on bundle configuration see [Symfony bundles configuration](https://symfony.com/doc/current/bundles/configuration.html).
 
 ## Development & Testing
