@@ -60,17 +60,7 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface
 
     public function start(PaymentPersistence &$payment): StartResponseInterface
     {
-        $body = [
-            'amount' => number_format((float) $payment->getAmount(), 2),
-            'currency' => $payment->getCurrency(),
-            'paymentType' => 'CD',
-        ];
-
-        $contract = $payment->getPaymentContract();
-        $paymentData = $this->postPaymentData($contract, $body);
-        $this->paymentDataService->createPaymentData($payment, $paymentData);
-
-        $widgetUrl = $this->getWidgetUrl($payment, $paymentData);
+        $widgetUrl = $this->getWidgetUrl($payment);
         $data = null;
         $error = null;
 
@@ -105,7 +95,7 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface
         return $this->connection[$contract];
     }
 
-    private function postPaymentData(string $contract, array $data): ?PaymentData
+    public function postPaymentData(string $contract, array $data): ?PaymentData
     {
         $paymentData = null;
 
@@ -142,27 +132,16 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface
         return $paymentData;
     }
 
-    private function getWidgetUrl(PaymentPersistence $payment, PaymentData $paymentData): string
+    private function getWidgetUrl(PaymentPersistence $payment): string
     {
         $contract = $payment->getPaymentContract();
         $method = $payment->getPaymentMethod();
         $contractConfig = $this->config['payment_contracts'][$contract];
         $config = $contractConfig['payment_methods_to_widgets'][$method];
 
-        $shopperResultUrl = $payment->getReturnUrl();
-        $brands = $config['brands'];
-        $checkoutId = $paymentData->getId();
-        $scriptSrc = $contractConfig['api_url'].'/v1/paymentWidgets.js?checkoutId='.$checkoutId;
-        $pspData = null;
-        $pspError = null;
-
         $uriTemplate = new UriTemplate($config['widget_url']);
         $uri = (string) $uriTemplate->expand([
-            'shopperResultUrl' => $shopperResultUrl,
-            'brands' => $brands,
-            'scriptSrc' => $scriptSrc,
-            'pspData' => $pspData,
-            'pspError' => $pspError,
+            'identifier' => $payment->getIdentifier(),
         ]);
         $uri = $this->urlHelper->getAbsoluteUrl($uri);
 

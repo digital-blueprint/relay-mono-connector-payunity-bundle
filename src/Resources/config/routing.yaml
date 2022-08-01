@@ -1,0 +1,5 @@
+dbp_relay_mono_connector_payunity_bundle:
+  path: /mono-connector-payunity/widget
+  methods: ['GET']
+  defaults:
+    _controller: Dbp\Relay\MonoConnectorPayunityBundle\Controller\Widget::index

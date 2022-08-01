@@ -1,4 +1,8 @@
 services:
+  Dbp\Relay\MonoConnectorPayunityBundle\Controller\Widget:
+    autowire: true
+    autoconfigure: true
+
   Dbp\Relay\MonoConnectorPayunityBundle\Service\PaymentDataService:
     autowire: true
     autoconfigure: true

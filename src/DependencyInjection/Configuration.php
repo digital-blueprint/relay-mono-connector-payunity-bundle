@@ -41,6 +41,8 @@ class Configuration implements ConfigurationInterface
                                         ->end()
                                         ->scalarNode('widget_url')
                                         ->end()
+                                        ->scalarNode('template')
+                                        ->end()
                                         ->scalarNode('icon_url')
                                         ->end()
                                         ->scalarNode('brands')

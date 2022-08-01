@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Apple Pay</title>
+    <style>
+        .alert {
+            position: relative;
+            padding: 1rem;
+        }
+        .alert-danger {
+            color: #842029;
+            background: #f8d7da;
+        }
+    </style>
+</head>
+<body>
+<form action="{{ shopperResultUrl }}" class="paymentWidgets" data-brands="{{ brands }}"></form>
+<script src="{{ scriptSrc }}"></script>
+<script type="text/javascript">
+    function cannotMakePayment()
+    {
+        var div = document.createElement('div');
+        div.classList.add('alert', 'alert-danger');
+        div.attributes['role'] = 'alert';
+        div.innerText = 'Apple Pay steht auf diesem Endgerät nicht zur Verfügung!'
+
+        var body = document.querySelector('body');
+        body.append(div);
+    }
+
+    if (window.ApplePaySession) {
+        var promise = ApplePaySession.canMakePayments();
+        promise.then(function (canMakePayments) {
+            if (canMakePayments) {
+                // Display Apple Pay button here.
+            } else {
+                cannotMakePayment();
+            }
+        });
+    } else {
+        cannotMakePayment();
+    }
+</script>
+</body>
+</html>
