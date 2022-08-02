@@ -28,6 +28,8 @@ class DbpRelayMonoConnectorPayunityExtension extends ConfigurableExtension imple
         );
         $loader->load('services.yaml');
 
+        $this->addRouteResource($container, __DIR__.'/../Resources/config/routing.yaml', 'yaml');
+
         $definition = $container->getDefinition(PayunityFlexService::class);
         $definition->addMethodCall('setConfig', [$mergedConfig]);
 
