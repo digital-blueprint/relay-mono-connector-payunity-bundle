@@ -2,12 +2,18 @@
 <html>
 <head>
     <title>Credit card</title>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+    </style>
 </head>
 <body>
 <form action="{{ shopperResultUrl }}" class="paymentWidgets" data-brands="{{ brands }}"></form>
 <script>
 var wpwlOptions = {
     locale: "de",
+    style: "plain",
 }
 </script>
 <script src="{{ scriptSrc }}"></script>
