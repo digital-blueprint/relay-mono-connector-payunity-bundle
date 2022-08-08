@@ -6,6 +6,13 @@
         body {
             font-family: sans-serif;
         }
+
+        /* workaround chrome layout being broken with 320px wide window */
+        @media (max-width: 480px) {
+            .wpwl-label-brand {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
