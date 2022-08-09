@@ -17,11 +17,16 @@ use Dbp\Relay\MonoConnectorPayunityBundle\Api\PaymentData;
 use GuzzleHttp\Exception\RequestException;
 use League\Uri\UriTemplate;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\NullLogger;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\UrlHelper;
 
-class PayunityFlexService implements PaymentServiceProviderServiceInterface
+class PayunityFlexService implements PaymentServiceProviderServiceInterface, LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     /**
      * @var array
      */
@@ -48,6 +53,7 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface
     ) {
         $this->paymentDataService = $paymentDataService;
         $this->urlHelper = $urlHelper;
+        $this->logger = new NullLogger();
     }
 
     /**
@@ -115,7 +121,8 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface
             );
             $paymentData = $this->parsePostPaymentDataResponse($response);
         } catch (RequestException $e) {
-            throw ApiError::withDetails(Response::HTTP_INTERNAL_SERVER_ERROR, 'Communication error with payment service provider!', 'mono:psp-communication-error', ['message' => $e->getMessage()]);
+            $this->logger->error('Communication error with payment service provider!', ['exception' => $e]);
+            throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, 'Communication error with payment service provider!');
         }
 
         return $paymentData;
@@ -202,7 +209,8 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface
             );
             $paymentData = $this->parseGetPaymentDataResponse($response);
         } catch (RequestException $e) {
-            throw ApiError::withDetails(Response::HTTP_INTERNAL_SERVER_ERROR, 'Communication error with payment service provider!', 'mono:psp-communication-error', ['message' => $e->getMessage()]);
+            $this->logger->error('Communication error with payment service provider!', ['exception' => $e]);
+            throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, 'Communication error with payment service provider!');
         }
 
         return $paymentData;
@@ -228,7 +236,8 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface
             );
             $paymentData = $this->parseGetPaymentDataResponse($response);
         } catch (RequestException $e) {
-            throw ApiError::withDetails(Response::HTTP_INTERNAL_SERVER_ERROR, 'Communication error with payment service provider!', 'mono:psp-communication-error', ['message' => $e->getMessage()]);
+            $this->logger->error('Communication error with payment service provider!', ['exception' => $e]);
+            throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, 'Communication error with payment service provider!');
         }
 
         return $paymentData;
