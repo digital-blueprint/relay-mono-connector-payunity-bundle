@@ -67,4 +67,18 @@ class PaymentDataService implements LoggerAwareInterface
 
         return $paymentDataPersistence;
     }
+
+    public function cleanupByPaymentIdentifier(string $paymentIdentifier)
+    {
+        $paymentDataPersistences = $this->em
+            ->getRepository(PaymentDataPersistence::class)
+            ->findBy([
+                'paymentIdentifier' => $paymentIdentifier,
+            ]);
+
+        foreach ($paymentDataPersistences as $paymentDataPersistence) {
+            $this->em->remove($paymentDataPersistence);
+        }
+        $this->em->flush();
+    }
 }

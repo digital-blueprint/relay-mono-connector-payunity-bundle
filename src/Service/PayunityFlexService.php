@@ -250,10 +250,18 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
     {
         $json = (string) $response->getBody();
         $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        $this->logger->debug('payunity flex service: get payment data response', $data);
 
         $paymentData = new PaymentData();
         $paymentData->fromJsonResponse($data);
 
         return $paymentData;
+    }
+
+    public function cleanup(PaymentPersistence &$payment): bool
+    {
+        $this->paymentDataService->cleanupByPaymentIdentifier($payment->getIdentifier());
+
+        return true;
     }
 }
