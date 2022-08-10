@@ -19,7 +19,7 @@ use League\Uri\UriTemplate;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use Psr\Log\NullLogger;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\UrlHelper;
 
@@ -48,12 +48,13 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
     private $urlHelper;
 
     public function __construct(
+        LoggerInterface $logger,
         PaymentDataService $paymentDataService,
         UrlHelper $urlHelper
     ) {
         $this->paymentDataService = $paymentDataService;
         $this->urlHelper = $urlHelper;
-        $this->logger = new NullLogger();
+        $this->logger = $logger;
     }
 
     /**
@@ -109,6 +110,7 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
 
         $entityId = $connection->getEntityId();
         $data['entityId'] = $entityId;
+        $this->logger->debug('payunity flex service: post payment data request', $data);
 
         $client = $connection->getClient();
         $uri = '/v1/checkouts';
@@ -132,6 +134,7 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
     {
         $json = (string) $response->getBody();
         $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        $this->logger->debug('payunity flex service: post payment data response', $data);
 
         $paymentData = new PaymentData();
         $paymentData->fromJsonResponse($data);
