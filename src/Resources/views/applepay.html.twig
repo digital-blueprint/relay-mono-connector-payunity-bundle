@@ -37,15 +37,19 @@ var wpwlOptions = {
         body.append(div);
     }
 
+    // Checking for Apple Pay Availability
+    // https://developer.apple.com/documentation/apple_pay_on_the_web/apple_pay_js_api/checking_for_apple_pay_availability
     if (window.ApplePaySession) {
-        var promise = ApplePaySession.canMakePayments();
-        promise.then(function (canMakePayments) {
+        //var merchantIdentifier = 'example.com.store';
+        //var promise = ApplePaySession.canMakePaymentsWithActiveCard(merchantIdentifier);
+        //promise.then(function (canMakePayments) {
+            var canMakePayments = ApplePaySession.canMakePayments();
             if (canMakePayments) {
                 // Display Apple Pay button here.
             } else {
                 cannotMakePayment();
             }
-        });
+        //});
     } else {
         cannotMakePayment();
     }
