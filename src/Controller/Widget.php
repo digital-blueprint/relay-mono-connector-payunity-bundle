@@ -64,7 +64,7 @@ class Widget extends AbstractController
         $config = $contractConfig['payment_methods_to_widgets'][$method];
 
         $body = [
-            'amount' => number_format((float) $payment->getAmount(), 2),
+            'amount' => number_format((float) $payment->getAmount(), 2, '.', ''),
             'currency' => $payment->getCurrency(),
             'paymentType' => 'CD',
         ];
