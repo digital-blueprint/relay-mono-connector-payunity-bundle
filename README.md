@@ -50,6 +50,10 @@ dbp_relay_mono_connector_payunity:
           widget_url: '/mono-connector-payunity/widget?identifier={identifier}'
           template: 'index.html.twig'
           brands: 'GOOGLEPAY'
+        payunity_sofortueberweisung:
+          widget_url: '/mono-connector-payunity/widget?identifier={identifier}'
+          template: 'index.html.twig'
+          brands: 'SOFORTUEBERWEISUNG'
 ```
 
 For more info on bundle configuration see [Symfony bundles configuration](https://symfony.com/doc/current/bundles/configuration.html).
