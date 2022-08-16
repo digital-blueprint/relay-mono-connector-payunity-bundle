@@ -84,6 +84,7 @@ class Widget extends AbstractController
             'shopperResultUrl' => $shopperResultUrl,
             'brands' => $brands,
             'scriptSrc' => $scriptSrc,
+            'recipient' => $payment->getRecipient(),
         ];
 
         $template = $twig->load($config['template']);
