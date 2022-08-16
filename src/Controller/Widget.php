@@ -66,7 +66,7 @@ class Widget extends AbstractController
         $body = [
             'amount' => number_format((float) $payment->getAmount(), 2, '.', ''),
             'currency' => $payment->getCurrency(),
-            'paymentType' => 'CD',
+            'paymentType' => 'DB',
         ];
 
         $contract = $payment->getPaymentContract();
