@@ -31,7 +31,9 @@
 var wpwlOptions = {
     locale: "de",
     style: "plain",
-    total: {label: {{ recipient }}
+    total: {
+        label: "{{ recipient|e('js') }}"
+    },
 }
 </script>
 <script src="{{ scriptSrc }}"></script>
