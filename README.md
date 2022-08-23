@@ -39,19 +39,19 @@ dbp_relay_mono_connector_payunity:
       access_token: '%env(MONO_CONNECTOR_PAYUNITY_ACCESS_TOKEN)%'
       payment_methods_to_widgets:
         payunity_creditcard:
-          widget_url: '/mono-connector-payunity/widget?identifier={identifier}'
+          widget_url: '/mono-connector-payunity/widget?identifier={identifier}&lang={lang}'
           template: 'index.html.twig'
           brands: 'AMEX DINERS DISCOVER JCB MASTER VISA'
         payunity_applepay:
-          widget_url: '/mono-connector-payunity/widget?identifier={identifier}'
+          widget_url: '/mono-connector-payunity/widget?identifier={identifier}&lang={lang}'
           template: 'applepay.html.twig'
           brands: 'APPLEPAY'
         payunity_googlepay:
-          widget_url: '/mono-connector-payunity/widget?identifier={identifier}'
+          widget_url: '/mono-connector-payunity/widget?identifier={identifier}&lang={lang}'
           template: 'index.html.twig'
           brands: 'GOOGLEPAY'
         payunity_sofortueberweisung:
-          widget_url: '/mono-connector-payunity/widget?identifier={identifier}'
+          widget_url: '/mono-connector-payunity/widget?identifier={identifier}&lang={lang}'
           template: 'index.html.twig'
           brands: 'SOFORTUEBERWEISUNG'
 ```

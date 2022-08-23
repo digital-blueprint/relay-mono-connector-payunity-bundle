@@ -31,7 +31,7 @@
 <form action="{{ shopperResultUrl }}" class="paymentWidgets" data-brands="{{ brands }}"></form>
 <script>
 var wpwlOptions = {
-    locale: "de",
+    locale: "{{ locale|e('js') }}",
     style: "plain",
 }
 </script>

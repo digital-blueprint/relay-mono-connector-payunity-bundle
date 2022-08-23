@@ -29,7 +29,7 @@
 <form action="{{ shopperResultUrl }}" class="paymentWidgets" data-brands="{{ brands }}"></form>
 <script>
 var wpwlOptions = {
-    locale: "de",
+    locale: "{{ locale|e('js') }}",
     style: "plain",
     total: {
         label: "{{ recipient|e('js') }}"
@@ -43,7 +43,11 @@ var wpwlOptions = {
         var div = document.createElement('div');
         div.classList.add('alert', 'alert-danger');
         div.attributes['role'] = 'alert';
-        div.innerText = 'Apple Pay steht auf diesem Endgerät nicht zur Verfügung!'
+        if (wpwlOptions.locale === 'de') {
+            div.innerText = 'Apple Pay steht auf diesem Endgerät nicht zur Verfügung!'
+        } else {
+            div.innerText = 'Apple Pay is not available on this device!'
+        }
 
         var body = document.querySelector('body');
         body.append(div);

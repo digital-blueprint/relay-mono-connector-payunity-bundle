@@ -20,6 +20,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\UrlHelper;
 
@@ -47,14 +48,21 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
      */
     private $urlHelper;
 
+    /**
+     * @var RequestStack
+     */
+    private $requestStack;
+
     public function __construct(
         LoggerInterface $logger,
         PaymentDataService $paymentDataService,
-        UrlHelper $urlHelper
+        UrlHelper $urlHelper,
+        RequestStack $requestStack
     ) {
         $this->paymentDataService = $paymentDataService;
         $this->urlHelper = $urlHelper;
         $this->logger = $logger;
+        $this->requestStack = $requestStack;
     }
 
     /**
@@ -149,9 +157,13 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
         $contractConfig = $this->config['payment_contracts'][$contract];
         $config = $contractConfig['payment_methods_to_widgets'][$method];
 
+        $request = $this->requestStack->getCurrentRequest();
+        $locale = ($request !== null) ? $request->getLocale() : \Locale::getDefault();
+
         $uriTemplate = new UriTemplate($config['widget_url']);
         $uri = (string) $uriTemplate->expand([
             'identifier' => $payment->getIdentifier(),
+            'lang' => \Locale::getPrimaryLanguage($locale) ?? 'en',
         ]);
         $uri = $this->urlHelper->getAbsoluteUrl($uri);
 

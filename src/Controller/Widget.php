@@ -56,6 +56,15 @@ class Widget extends AbstractController
     public function index(Request $request): Response
     {
         $identifier = (string) $request->query->get('identifier');
+        if ($request->query->has('lang')) {
+            $lang = $request->query->get('lang');
+            assert(is_string($lang));
+            $locale = \Locale::acceptFromHttp($lang);
+            if ($locale !== false) {
+                $request->setLocale($locale);
+            }
+        }
+
         $payment = $this->paymentService->getPaymentPersistenceByIdentifier($identifier);
 
         $contract = $payment->getPaymentContract();
@@ -76,6 +85,11 @@ class Widget extends AbstractController
         $loader = new FilesystemLoader(dirname(__FILE__).'/../Resources/views/');
         $twig = new Environment($loader);
 
+        // payunity supports a list of locales, which more or less match the primary language format,
+        // so just use that instead fo hardcoding the list:
+        // https://www.payunity.com/tutorials/integration-guide/customisation#optionslang
+        $puLocale = \Locale::getPrimaryLanguage($request->getLocale()) ?? 'en';
+
         $shopperResultUrl = $payment->getPspReturnUrl();
         $brands = $config['brands'];
         $checkoutId = $paymentData->getId();
@@ -85,6 +99,7 @@ class Widget extends AbstractController
             'brands' => $brands,
             'scriptSrc' => $scriptSrc,
             'recipient' => $payment->getRecipient(),
+            'locale' => $puLocale,
         ];
 
         $template = $twig->load($config['template']);
