@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\MonoConnectorPayunityBundle\Controller;
 
 use Dbp\Relay\MonoBundle\Service\PaymentService;
+use Dbp\Relay\MonoConnectorPayunityBundle\Api\PaymentType;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\PaymentDataService;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityFlexService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -75,7 +76,7 @@ class Widget extends AbstractController
         $body = [
             'amount' => number_format((float) $payment->getAmount(), 2, '.', ''),
             'currency' => $payment->getCurrency(),
-            'paymentType' => 'DB',
+            'paymentType' => PaymentType::DB,
         ];
 
         $contract = $payment->getPaymentContract();
