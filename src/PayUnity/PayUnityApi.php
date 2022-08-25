@@ -79,8 +79,10 @@ class PayUnityApi implements LoggerAwareInterface
         $code = $result['code'];
         $description = $result['description'];
         $message = "[$code] $description";
+        $exc = new ApiException($message);
+        $exc->result = new ResultCode($code, $description);
 
-        return new ApiException($message);
+        return $exc;
     }
 
     private function parsePostPaymentDataResponse(ResponseInterface $response): PaymentData

@@ -186,18 +186,13 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
             $paymentData = $this->getCheckoutPaymentData($contract, $paymentDataPersisted->getPspIdentifier());
 
             // https://payunity.docs.oppwa.com/reference/resultCodes
-            $code = $paymentData->getCode();
-            if (
-                preg_match('/^(000\.000\.|000\.100\.1|000\.[36])/', $code)
-                || preg_match('/^(000\.400\.0[^3]|000\.400\.[0-1]{2}0)/', $code)
-            ) {
+            $result = $paymentData->getResult();
+
+            if ($result->isSuccessfullyProcessed() || $result->isSuccessfullyProcessedNeedsManualReview()) {
                 $payment->setPaymentStatus(Payment::PAYMENT_STATUS_COMPLETED);
                 $completedAt = new \DateTime();
                 $payment->setCompletedAt($completedAt);
-            } elseif (
-                preg_match('/^(000\.200)/', $code)
-                || preg_match('/^(800\.400\.5|100\.400\.500)/', $code)
-            ) {
+            } elseif ($result->isPending() || $result->isPendingExtra()) {
                 $payment->setPaymentStatus(Payment::PAYMENT_STATUS_PENDING);
             } else {
                 $payment->setPaymentStatus(Payment::PAYMENT_STATUS_FAILED);

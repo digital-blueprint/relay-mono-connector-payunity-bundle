@@ -8,6 +8,7 @@ use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\ApiException;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Connection;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PaymentType;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PayUnityApi;
+use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\ResultCode;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Tools;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -45,6 +46,21 @@ class PayUnityTest extends TestCase
         $this->conn->setClientHandler($stack);
     }
 
+    public function testResultCode()
+    {
+        $this->assertTrue((new ResultCode('000.000.000'))->isSuccessfullyProcessed());
+        $this->assertFalse((new ResultCode('000.000.000'))->isSuccessfullyProcessedNeedsManualReview());
+
+        $this->assertTrue((new ResultCode('000.400.000'))->isSuccessfullyProcessedNeedsManualReview());
+        $this->assertFalse((new ResultCode('000.400.000'))->isSuccessfullyProcessed());
+
+        $this->assertTrue((new ResultCode('000.200.000'))->isPending());
+        $this->assertFalse((new ResultCode('000.200.000'))->isPendingExtra());
+
+        $this->assertTrue((new ResultCode('100.400.500'))->isPendingExtra());
+        $this->assertFalse((new ResultCode('100.400.500'))->isPending());
+    }
+
     public function testPrepareCheckout()
     {
         $BODY = '{
@@ -63,8 +79,8 @@ class PayUnityTest extends TestCase
 
         $data = $this->api->prepareCheckout('42.42', 'EUR', PaymentType::DB);
 
-        $this->assertSame('000.200.100', $data->getCode());
-        $this->assertSame('successfully created checkout', $data->getDescription());
+        $this->assertSame('000.200.100', $data->getResult()->getCode());
+        $this->assertSame('successfully created checkout', $data->getResult()->getDescription());
         $this->assertSame('A03A5F2526733FBB37C419B815E1C091.uat01-vm-tx03', $data->getId());
     }
 

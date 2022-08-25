@@ -6,4 +6,8 @@ namespace Dbp\Relay\MonoConnectorPayunityBundle\PayUnity;
 
 class ApiException extends \Exception
 {
+    /**
+     * @var ?ResultCode
+     */
+    public $result;
 }
