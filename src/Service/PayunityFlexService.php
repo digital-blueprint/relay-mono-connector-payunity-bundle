@@ -107,6 +107,8 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
             );
         }
 
+        $this->connection[$contract]->setLogger($this->logger);
+
         return $this->connection[$contract];
     }
 
