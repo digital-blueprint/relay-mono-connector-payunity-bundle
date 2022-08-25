@@ -34,9 +34,10 @@ class PayUnityApi implements LoggerAwareInterface
      * @param $paymentType - See PaymentType
      * @param $extra - extra key/value pairs passed to the API, see the docs
      */
-    public function prepareCheckout(string $amount, string $currency, string $paymentType, array $extra = []): PaymentData
+    public function prepareCheckout(string $amount, string $currency, string $paymentType, array $extra = []): Checkout
     {
-        $uri = '/v1/checkouts';
+        $uriTemplate = new UriTemplate('v1/checkouts');
+        $uri = (string) $uriTemplate->expand();
         $client = $this->connection->getClient();
 
         $data = [
@@ -63,9 +64,9 @@ class PayUnityApi implements LoggerAwareInterface
             throw self::createResponseError($e);
         }
 
-        $paymentData = $this->parsePostPaymentDataResponse($response);
+        $checkout = $this->parseCheckoutResponse($response);
 
-        return $paymentData;
+        return $checkout;
     }
 
     /**
@@ -73,12 +74,126 @@ class PayUnityApi implements LoggerAwareInterface
      */
     public function getPaymentScriptSrc(string $checkoutId): string
     {
-        $uriTemplate = new UriTemplate($this->connection->getBaseUri().'v1/paymentWidgets.js?checkoutId={checkoutId}');
+        $uriTemplate = new UriTemplate($this->connection->getBaseUri().'v1/paymentWidgets.js{?checkoutId}');
         $uri = (string) $uriTemplate->expand([
             'checkoutId' => $checkoutId,
         ]);
 
         return $uri;
+    }
+
+    /**
+     * Get the payment status. See https://www.payunity.com/tutorials/integration-guide.
+     *
+     * Once a status response is successful the checkout identifier can't be used anymore.
+     * A throttling rule applies for get payment status calls. Per checkout,
+     * it is allowed to send two get payment requests in a minute.
+     */
+    public function getPaymentStatus(string $checkoutId): PaymentData
+    {
+        $connection = $this->connection;
+        $client = $this->connection->getClient();
+        $entityId = $connection->getEntityId();
+
+        $uriTemplate = new UriTemplate('v1/checkouts/{checkoutId}/payment{?entityId}');
+        $uri = (string) $uriTemplate->expand([
+            'checkoutId' => $checkoutId,
+            'entityId' => $entityId,
+        ]);
+
+        try {
+            $response = $client->get($uri);
+        } catch (RequestException $e) {
+            throw self::createResponseError($e);
+        }
+
+        $paymentData = $this->parseGetPaymentStatusResponse($response);
+
+        return $paymentData;
+    }
+
+    /**
+     * Get a report with the details of an existing payment.
+     * See https://www.payunity.com/tutorials/reporting/transaction.
+     *
+     * @param $paymentId - The payment ID you get via getPaymentStatus()
+     */
+    public function queryPayment(string $paymentId): PaymentData
+    {
+        $connection = $this->connection;
+        $client = $this->connection->getClient();
+        $entityId = $connection->getEntityId();
+
+        $uriTemplate = new UriTemplate('v1/query/{paymentId}{?entityId}');
+        $uri = (string) $uriTemplate->expand([
+            'paymentId' => $paymentId,
+            'entityId' => $entityId,
+        ]);
+
+        try {
+            $response = $client->get($uri);
+        } catch (RequestException $e) {
+            throw self::createResponseError($e);
+        }
+
+        $paymentData = $this->parseGetPaymentStatusResponse($response);
+
+        return $paymentData;
+    }
+
+    /**
+     * Get a report with the details payments for a specific merchant. You need to pass a merchantTransactionId
+     * to prepareCheckout() if you want to query them with this later on
+     * See https://www.payunity.com/tutorials/reporting/transaction for this report and
+     * https://www.payunity.com/reference/parameters#basic for the merchantTransactionId.
+     *
+     * @param $merchantTransactionId - Merchant-provided reference number
+     */
+    public function queryMerchant(string $merchantTransactionId): PaymentList
+    {
+        $connection = $this->connection;
+        $client = $this->connection->getClient();
+        $entityId = $connection->getEntityId();
+
+        $uriTemplate = new UriTemplate('v1/query{?entityId,merchantTransactionId}');
+        $uri = (string) $uriTemplate->expand([
+            'merchantTransactionId' => $merchantTransactionId,
+            'entityId' => $entityId,
+        ]);
+
+        try {
+            $response = $client->get($uri);
+        } catch (RequestException $e) {
+            throw self::createResponseError($e);
+        }
+
+        $paymentList = $this->parseGetPaymentListResponse($response);
+
+        return $paymentList;
+    }
+
+    private function parseGetPaymentListResponse(ResponseInterface $response): PaymentList
+    {
+        $json = (string) $response->getBody();
+        $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        $this->logger->debug('payunity flex service: get payment list response', $data);
+
+        $paymentList = new PaymentList();
+        $paymentList->fromJsonResponse($data);
+
+        return $paymentList;
+    }
+
+    private function parseGetPaymentStatusResponse(ResponseInterface $response): PaymentData
+    {
+        $json = (string) $response->getBody();
+        $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        $this->logger->debug('payunity flex service: get payment status response', $data);
+
+        $paymentData = new PaymentData();
+        $paymentData->fromJsonResponse($data);
+
+        return $paymentData;
     }
 
     private static function createResponseError(RequestException $e): ApiException
@@ -99,15 +214,15 @@ class PayUnityApi implements LoggerAwareInterface
         return $exc;
     }
 
-    private function parsePostPaymentDataResponse(ResponseInterface $response): PaymentData
+    private function parseCheckoutResponse(ResponseInterface $response): Checkout
     {
         $json = (string) $response->getBody();
         $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        $this->logger->debug('payunity flex service: post payment data response', $data);
+        $this->logger->debug('payunity flex service: checkout data response', $data);
 
-        $paymentData = new PaymentData();
-        $paymentData->fromJsonResponse($data);
+        $checkout = new Checkout();
+        $checkout->fromJsonResponse($data);
 
-        return $paymentData;
+        return $checkout;
     }
 }
