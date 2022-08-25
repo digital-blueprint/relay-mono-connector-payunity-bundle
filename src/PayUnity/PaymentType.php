@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\MonoConnectorPayunityBundle\Api;
+namespace Dbp\Relay\MonoConnectorPayunityBundle\PayUnity;
 
 /**
  * The payment type for the request.

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\MonoConnectorPayunityBundle\Entity;
 
 use Dbp\Relay\MonoBundle\Entity\PaymentPersistence;
-use Dbp\Relay\MonoConnectorPayunityBundle\Api\PaymentData;
+use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PaymentData;
 use Doctrine\ORM\Mapping as ORM;
 
 /**

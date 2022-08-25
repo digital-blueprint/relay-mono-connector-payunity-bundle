@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\MonoConnectorPayunityBundle\Controller;
 
 use Dbp\Relay\MonoBundle\Service\PaymentService;
-use Dbp\Relay\MonoConnectorPayunityBundle\Api\PaymentType;
+use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PaymentType;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\PaymentDataService;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityFlexService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
