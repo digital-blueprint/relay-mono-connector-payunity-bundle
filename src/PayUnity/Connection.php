@@ -6,9 +6,14 @@ namespace Dbp\Relay\MonoConnectorPayunityBundle\PayUnity;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\NullLogger;
 
-class Connection
+class Connection implements LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     private $apiUrl;
     private $entityId;
     private $accessToken;
@@ -19,6 +24,7 @@ class Connection
         $this->apiUrl = $apiUrl;
         $this->entityId = $entityId;
         $this->accessToken = $accessToken;
+        $this->logger = new NullLogger();
     }
 
     public function setClientHandler(?object $handler): void
@@ -49,6 +55,10 @@ class Connection
                 'Accept' => 'application/json',
             ],
         ];
+
+        if ($this->logger !== null) {
+            $stack->push(Tools::createLoggerMiddleware($this->logger));
+        }
 
         $client = new Client($client_options);
 
