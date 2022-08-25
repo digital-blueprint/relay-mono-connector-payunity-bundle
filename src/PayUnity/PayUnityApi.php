@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\MonoConnectorPayunityBundle\PayUnity;
 
 use GuzzleHttp\Exception\RequestException;
+use League\Uri\UriTemplate;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -65,6 +66,19 @@ class PayUnityApi implements LoggerAwareInterface
         $paymentData = $this->parsePostPaymentDataResponse($response);
 
         return $paymentData;
+    }
+
+    /**
+     * The absolute JS script URL that needs to be used for the frontend form.
+     */
+    public function getPaymentScriptSrc(string $checkoutId): string
+    {
+        $uriTemplate = new UriTemplate($this->connection->getBaseUri().'v1/paymentWidgets.js?checkoutId={checkoutId}');
+        $uri = (string) $uriTemplate->expand([
+            'checkoutId' => $checkoutId,
+        ]);
+
+        return $uri;
     }
 
     private static function createResponseError(RequestException $e): ApiException

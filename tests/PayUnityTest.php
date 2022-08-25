@@ -94,4 +94,11 @@ class PayUnityTest extends TestCase
         $this->expectErrorMessage('[200.300.404] invalid or missing parameter');
         $this->api->prepareCheckout('-20.20', 'EUR', PaymentType::DB);
     }
+
+    public function testGetPaymentScriptSrc()
+    {
+        $this->assertSame(
+            'http://localhost/v1/paymentWidgets.js?checkoutId=nop%26e',
+            $this->api->getPaymentScriptSrc('nop&e'));
+    }
 }

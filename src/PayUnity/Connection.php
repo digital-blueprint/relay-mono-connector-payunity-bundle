@@ -37,18 +37,24 @@ class Connection implements LoggerAwareInterface
         return $this->entityId;
     }
 
-    public function getClient(): Client
+    public function getBaseUri(): string
     {
-        $token = $this->accessToken;
-
-        $stack = HandlerStack::create($this->clientHandler);
         $base_uri = $this->apiUrl;
         if (substr($base_uri, -1) !== '/') {
             $base_uri .= '/';
         }
 
+        return $base_uri;
+    }
+
+    public function getClient(): Client
+    {
+        $token = $this->accessToken;
+
+        $stack = HandlerStack::create($this->clientHandler);
+
         $client_options = [
-            'base_uri' => $base_uri,
+            'base_uri' => $this->getBaseUri(),
             'handler' => $stack,
             'headers' => [
                 'Authorization' => 'Bearer '.$token,
