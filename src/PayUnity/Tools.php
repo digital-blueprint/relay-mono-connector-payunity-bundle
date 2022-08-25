@@ -10,6 +10,11 @@ use Psr\Log\LoggerInterface;
 
 class Tools
 {
+    public static function floatToAmount(float $amount): string
+    {
+        return number_format($amount, 2, '.', '');
+    }
+
     public static function createLoggerMiddleware(LoggerInterface $logger): callable
     {
         return Middleware::log(

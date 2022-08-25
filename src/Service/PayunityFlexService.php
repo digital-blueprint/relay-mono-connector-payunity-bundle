@@ -133,6 +133,9 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
             );
             $paymentData = $this->parsePostPaymentDataResponse($response);
         } catch (RequestException $e) {
+            $response = $e->getResponse();
+            $data = (string) $response->getBody();
+            dump($data);
             $this->logger->error('Communication error with payment service provider!', ['exception' => $e]);
             throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, 'Communication error with payment service provider!');
         }
