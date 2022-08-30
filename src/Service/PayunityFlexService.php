@@ -24,6 +24,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\UrlHelper;
+use Symfony\Component\Uid\Uuid;
 
 class PayunityFlexService implements PaymentServiceProviderServiceInterface, LoggerAwareInterface
 {
@@ -72,6 +73,29 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
     public function setConfig(array $config)
     {
         $this->config = $config;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getContracts(): array
+    {
+        return array_keys($this->config['payment_contracts']);
+    }
+
+    public function checkConnection($contract): void
+    {
+        $api = $this->getApiByContract($contract);
+        try {
+            $api->queryMerchant(Uuid::v4()->toRfc4122());
+        } catch (ApiException $e) {
+            // [700.400.580] cannot find transaction
+            // which is expected. Every other error means we couldn't connect/auth somehow.
+            if ($e->result->getCode() === '700.400.580') {
+                return;
+            }
+            throw $e;
+        }
     }
 
     public function start(PaymentPersistence &$payment): StartResponseInterface
