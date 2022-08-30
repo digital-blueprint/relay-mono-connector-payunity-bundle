@@ -77,7 +77,7 @@ class Widget extends AbstractController
         $contract = $payment->getPaymentContract();
         $amount = Tools::floatToAmount((float) $payment->getAmount());
         $currency = $payment->getCurrency();
-        $paymentType = PaymentType::DB;
+        $paymentType = PaymentType::DEBIT;
         $checkout = $this->payunityFlexService->postPaymentData($contract, $amount, $currency, $paymentType);
         $this->paymentDataService->createPaymentData($payment, $checkout);
 

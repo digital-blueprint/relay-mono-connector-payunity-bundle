@@ -81,7 +81,7 @@ class PayUnityTest extends TestCase
             new Response(200, ['Content-Type' => 'application/json'], $BODY),
         ], $history);
 
-        $data = $this->api->prepareCheckout('42.42', 'EUR', PaymentType::DB);
+        $data = $this->api->prepareCheckout('42.42', 'EUR', PaymentType::DEBIT);
         $this->assertSame('/v1/checkouts', $history[0]['request']->getRequestTarget());
         $this->assertSame('000.200.100', $data->getResult()->getCode());
         $this->assertSame('successfully created checkout', $data->getResult()->getDescription());
@@ -96,7 +96,7 @@ class PayUnityTest extends TestCase
         ]);
         $this->expectException(ApiException::class);
         $this->expectErrorMessage('[200.300.404] invalid or missing parameter');
-        $this->api->prepareCheckout('-20.20', 'EUR', PaymentType::DB);
+        $this->api->prepareCheckout('-20.20', 'EUR', PaymentType::DEBIT);
     }
 
     public function testGetPaymentScriptSrc()
