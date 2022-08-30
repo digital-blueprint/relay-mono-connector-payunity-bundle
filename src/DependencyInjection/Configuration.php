@@ -32,6 +32,11 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                                 ->scalarNode('access_token')
                                 ->end()
+                                ->enumNode('test_mode')
+                                    // See https://www.payunity.com/reference/parameters#testing
+                                    ->values(['internal', 'external'])
+                                    ->defaultNull()
+                                ->end()
                                 ->arrayNode('payment_methods_to_widgets')
                                     ->isRequired()
                                     ->cannotBeEmpty()

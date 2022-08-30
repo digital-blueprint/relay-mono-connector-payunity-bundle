@@ -78,7 +78,14 @@ class Widget extends AbstractController
         $amount = Tools::floatToAmount((float) $payment->getAmount());
         $currency = $payment->getCurrency();
         $paymentType = PaymentType::DEBIT;
-        $checkout = $this->payunityFlexService->postPaymentData($contract, $amount, $currency, $paymentType);
+        $extra = [];
+        $testMode = $contractConfig['test_mode'];
+        if ($testMode === 'internal') {
+            $extra['testMode'] = 'INTERNAL';
+        } elseif ($testMode === 'external') {
+            $extra['testMode'] = 'EXTERNAL';
+        }
+        $checkout = $this->payunityFlexService->postPaymentData($contract, $amount, $currency, $paymentType, $extra);
         $this->paymentDataService->createPaymentData($payment, $checkout);
 
         $loader = new FilesystemLoader(dirname(__FILE__).'/../Resources/views/');
