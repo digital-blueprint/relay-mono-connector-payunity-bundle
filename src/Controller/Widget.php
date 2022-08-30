@@ -6,6 +6,7 @@ namespace Dbp\Relay\MonoConnectorPayunityBundle\Controller;
 
 use Dbp\Relay\MonoBundle\Service\PaymentService;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PaymentType;
+use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Tools;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\PaymentDataService;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityFlexService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -73,15 +74,12 @@ class Widget extends AbstractController
         $contractConfig = $this->config['payment_contracts'][$contract];
         $config = $contractConfig['payment_methods_to_widgets'][$method];
 
-        $body = [
-            'amount' => number_format((float) $payment->getAmount(), 2, '.', ''),
-            'currency' => $payment->getCurrency(),
-            'paymentType' => PaymentType::DB,
-        ];
-
         $contract = $payment->getPaymentContract();
-        $paymentData = $this->payunityFlexService->postPaymentData($contract, $body);
-        $this->paymentDataService->createPaymentData($payment, $paymentData);
+        $amount = Tools::floatToAmount((float) $payment->getAmount());
+        $currency = $payment->getCurrency();
+        $paymentType = PaymentType::DB;
+        $checkout = $this->payunityFlexService->postPaymentData($contract, $amount, $currency, $paymentType);
+        $this->paymentDataService->createPaymentData($payment, $checkout);
 
         $loader = new FilesystemLoader(dirname(__FILE__).'/../Resources/views/');
         $twig = new Environment($loader);
@@ -93,8 +91,8 @@ class Widget extends AbstractController
 
         $shopperResultUrl = $payment->getPspReturnUrl();
         $brands = $config['brands'];
-        $checkoutId = $paymentData->getId();
-        $scriptSrc = $contractConfig['api_url'].'/v1/paymentWidgets.js?checkoutId='.$checkoutId;
+        $checkoutId = $checkout->getId();
+        $scriptSrc = $this->payunityFlexService->getPaymentScriptSrc($contract, $checkoutId);
         $context = [
             'shopperResultUrl' => $shopperResultUrl,
             'brands' => $brands,

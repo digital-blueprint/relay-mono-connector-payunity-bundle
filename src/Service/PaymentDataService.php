@@ -7,7 +7,7 @@ namespace Dbp\Relay\MonoConnectorPayunityBundle\Service;
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\MonoBundle\Entity\PaymentPersistence;
 use Dbp\Relay\MonoConnectorPayunityBundle\Entity\PaymentDataPersistence;
-use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PaymentData;
+use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Checkout;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerAwareInterface;
@@ -33,9 +33,9 @@ class PaymentDataService implements LoggerAwareInterface
         $this->logger = new NullLogger();
     }
 
-    public function createPaymentData(PaymentPersistence $payment, PaymentData $paymentData): PaymentData
+    public function createPaymentData(PaymentPersistence $payment, Checkout $checkout): void
     {
-        $paymentDataPersistence = PaymentDataPersistence::fromPaymentAndPaymentData($payment, $paymentData);
+        $paymentDataPersistence = PaymentDataPersistence::fromPaymentAndCheckout($payment, $checkout);
         $createdAt = new \DateTime();
         $paymentDataPersistence->setCreatedAt($createdAt);
 
@@ -46,8 +46,6 @@ class PaymentDataService implements LoggerAwareInterface
             $this->logger->error('Payment data could not be created!', ['exception' => $e]);
             throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, 'Payment data could not be created!');
         }
-
-        return $paymentData;
     }
 
     public function getByPaymentIdentifier(string $paymentIdentifier)

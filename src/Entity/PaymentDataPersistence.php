@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\MonoConnectorPayunityBundle\Entity;
 
 use Dbp\Relay\MonoBundle\Entity\PaymentPersistence;
-use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PaymentData;
+use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Checkout;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -87,11 +87,11 @@ class PaymentDataPersistence
         return $this;
     }
 
-    public static function fromPaymentAndPaymentData(PaymentPersistence $payment, PaymentData $paymentData): PaymentDataPersistence
+    public static function fromPaymentAndCheckout(PaymentPersistence $payment, Checkout $checkout): PaymentDataPersistence
     {
         $paymentDataPersistence = new PaymentDataPersistence();
         $paymentDataPersistence->setPaymentIdentifier($payment->getIdentifier());
-        $paymentDataPersistence->setPspIdentifier($paymentData->getId());
+        $paymentDataPersistence->setPspIdentifier($checkout->getId());
 
         return $paymentDataPersistence;
     }

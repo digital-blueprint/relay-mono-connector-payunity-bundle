@@ -12,11 +12,12 @@ use Dbp\Relay\MonoBundle\PaymentServiceProvider\CompleteResponseInterface;
 use Dbp\Relay\MonoBundle\PaymentServiceProvider\StartResponse;
 use Dbp\Relay\MonoBundle\PaymentServiceProvider\StartResponseInterface;
 use Dbp\Relay\MonoBundle\Service\PaymentServiceProviderServiceInterface;
+use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\ApiException;
+use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Checkout;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Connection;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PaymentData;
-use GuzzleHttp\Exception\RequestException;
+use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PayUnityApi;
 use League\Uri\UriTemplate;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
@@ -88,12 +89,12 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
         return $startResponse;
     }
 
-    private function getConnectionByContract(string $contract): Connection
+    private function getApiByContract(string $contract): PayUnityApi
     {
-        if (
-            !array_key_exists($contract, $this->connection)
-            && array_key_exists($contract, $this->config['payment_contracts'])
-        ) {
+        if (!array_key_exists($contract, $this->connection)) {
+            if (!array_key_exists($contract, $this->config['payment_contracts'])) {
+                throw new \RuntimeException("Contract $contract doesn't exist");
+            }
             $config = $this->config['payment_contracts'][$contract];
 
             $apiUrl = $config['api_url'];
@@ -107,52 +108,31 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
             );
         }
 
-        $this->connection[$contract]->setLogger($this->logger);
+        $connection = $this->connection[$contract];
+        $connection->setLogger($this->logger);
+        $api = new PayUnityApi($connection);
+        $api->setLogger($this->logger);
 
-        return $this->connection[$contract];
+        return $api;
     }
 
-    public function postPaymentData(string $contract, array $data): ?PaymentData
+    public function getPaymentScriptSrc(string $contract, string $checkoutId): string
     {
-        $paymentData = null;
+        $api = $this->getApiByContract($contract);
 
-        $connection = $this->getConnectionByContract($contract);
+        return $api->getPaymentScriptSrc($checkoutId);
+    }
 
-        $entityId = $connection->getEntityId();
-        $data['entityId'] = $entityId;
-        $this->logger->debug('payunity flex service: post payment data request', $data);
+    public function postPaymentData(string $contract, string $amount, string $currency, string $paymentType, array $extra = []): Checkout
+    {
+        $api = $this->getApiByContract($contract);
 
-        $client = $connection->getClient();
-        $uri = '/v1/checkouts';
         try {
-            $response = $client->post(
-                $uri,
-                [
-                    'form_params' => $data,
-                ]
-            );
-            $paymentData = $this->parsePostPaymentDataResponse($response);
-        } catch (RequestException $e) {
-            $response = $e->getResponse();
-            $data = (string) $response->getBody();
-            dump($data);
+            return $api->prepareCheckout($amount, $currency, $paymentType, $extra);
+        } catch (ApiException $e) {
             $this->logger->error('Communication error with payment service provider!', ['exception' => $e]);
             throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, 'Communication error with payment service provider!');
         }
-
-        return $paymentData;
-    }
-
-    private function parsePostPaymentDataResponse(ResponseInterface $response): PaymentData
-    {
-        $json = (string) $response->getBody();
-        $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        $this->logger->debug('payunity flex service: post payment data response', $data);
-
-        $paymentData = new PaymentData();
-        $paymentData->fromJsonResponse($data);
-
-        return $paymentData;
     }
 
     private function getWidgetUrl(PaymentPersistence $payment): string
@@ -181,7 +161,6 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
         $paymentDataPersisted = $this->paymentDataService->getByPaymentIdentifier($payment->getIdentifier());
 
         if ($payment->getPaymentStatus() === Payment::PAYMENT_STATUS_COMPLETED) {
-            //$paymentData = $this->getQueryPaymentData($contract, $paymentDataPersisted->getPspIdentifier());
         } else {
             $paymentData = $this->getCheckoutPaymentData($contract, $paymentDataPersisted->getPspIdentifier());
 
@@ -189,12 +168,15 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
             $result = $paymentData->getResult();
 
             if ($result->isSuccessfullyProcessed() || $result->isSuccessfullyProcessedNeedsManualReview()) {
+                $this->logger->error('Setting payment to complete', ['id' => $payment->getIdentifier()]);
                 $payment->setPaymentStatus(Payment::PAYMENT_STATUS_COMPLETED);
                 $completedAt = new \DateTime();
                 $payment->setCompletedAt($completedAt);
             } elseif ($result->isPending() || $result->isPendingExtra()) {
+                $this->logger->error('Setting payment to pending', ['id' => $payment->getIdentifier()]);
                 $payment->setPaymentStatus(Payment::PAYMENT_STATUS_PENDING);
             } else {
+                $this->logger->error('Setting payment to failed', ['id' => $payment->getIdentifier()]);
                 $payment->setPaymentStatus(Payment::PAYMENT_STATUS_FAILED);
             }
         }
@@ -204,70 +186,15 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
         return $completeResponse;
     }
 
-    private function getCheckoutPaymentData(string $contract, string $id): ?PaymentData
+    private function getCheckoutPaymentData(string $contract, string $checkoutId): PaymentData
     {
-        $paymentData = null;
-
-        $connection = $this->getConnectionByContract($contract);
-        $client = $connection->getClient();
-
-        $entityId = $connection->getEntityId();
-
-        $uriTemplate = new UriTemplate('/v1/checkouts/{id}/payment?entityId={entityId}');
-        $uri = (string) $uriTemplate->expand([
-            'id' => $id,
-            'entityId' => $entityId,
-        ]);
+        $api = $this->getApiByContract($contract);
         try {
-            $response = $client->get(
-                $uri
-            );
-            $paymentData = $this->parseGetPaymentDataResponse($response);
-        } catch (RequestException $e) {
+            return $api->getPaymentStatus($checkoutId);
+        } catch (ApiException $e) {
             $this->logger->error('Communication error with payment service provider!', ['exception' => $e]);
             throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, 'Communication error with payment service provider!');
         }
-
-        return $paymentData;
-    }
-
-    private function getQueryPaymentData(string $contract, string $id): ?PaymentData
-    {
-        $paymentData = null;
-
-        $connection = $this->getConnectionByContract($contract);
-        $client = $connection->getClient();
-
-        $entityId = $connection->getEntityId();
-
-        $uriTemplate = new UriTemplate('/v1/query/{id}?entityId={entityId}');
-        $uri = (string) $uriTemplate->expand([
-            'id' => $id,
-            'entityId' => $entityId,
-        ]);
-        try {
-            $response = $client->get(
-                $uri
-            );
-            $paymentData = $this->parseGetPaymentDataResponse($response);
-        } catch (RequestException $e) {
-            $this->logger->error('Communication error with payment service provider!', ['exception' => $e]);
-            throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, 'Communication error with payment service provider!');
-        }
-
-        return $paymentData;
-    }
-
-    private function parseGetPaymentDataResponse(ResponseInterface $response): PaymentData
-    {
-        $json = (string) $response->getBody();
-        $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        $this->logger->debug('payunity flex service: get payment data response', $data);
-
-        $paymentData = new PaymentData();
-        $paymentData->fromJsonResponse($data);
-
-        return $paymentData;
     }
 
     public function cleanup(PaymentPersistence &$payment): bool

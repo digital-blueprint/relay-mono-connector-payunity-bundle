@@ -54,6 +54,8 @@ class PayUnityApi implements LoggerAwareInterface
             $data[$key] = $value;
         }
 
+        $this->logger->debug('payunity: prepare checkout', $data);
+
         try {
             $response = $client->post(
                 $uri, [
@@ -95,6 +97,8 @@ class PayUnityApi implements LoggerAwareInterface
         $client = $this->connection->getClient();
         $entityId = $connection->getEntityId();
 
+        $this->logger->debug('payunity: get payment status');
+
         $uriTemplate = new UriTemplate('v1/checkouts/{checkoutId}/payment{?entityId}');
         $uri = (string) $uriTemplate->expand([
             'checkoutId' => $checkoutId,
@@ -123,6 +127,8 @@ class PayUnityApi implements LoggerAwareInterface
         $connection = $this->connection;
         $client = $this->connection->getClient();
         $entityId = $connection->getEntityId();
+
+        $this->logger->debug('payunity: query payment');
 
         $uriTemplate = new UriTemplate('v1/query/{paymentId}{?entityId}');
         $uri = (string) $uriTemplate->expand([
@@ -155,6 +161,8 @@ class PayUnityApi implements LoggerAwareInterface
         $client = $this->connection->getClient();
         $entityId = $connection->getEntityId();
 
+        $this->logger->debug('payunity: query merchant');
+
         $uriTemplate = new UriTemplate('v1/query{?entityId,merchantTransactionId}');
         $uri = (string) $uriTemplate->expand([
             'merchantTransactionId' => $merchantTransactionId,
@@ -176,7 +184,7 @@ class PayUnityApi implements LoggerAwareInterface
     {
         $json = (string) $response->getBody();
         $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        $this->logger->debug('payunity flex service: get payment list response', $data);
+        $this->logger->debug('payunity: get payment list response', $data);
 
         $paymentList = new PaymentList();
         $paymentList->fromJsonResponse($data);
@@ -188,7 +196,7 @@ class PayUnityApi implements LoggerAwareInterface
     {
         $json = (string) $response->getBody();
         $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        $this->logger->debug('payunity flex service: get payment status response', $data);
+        $this->logger->debug('payunity: get payment status response', $data);
 
         $paymentData = new PaymentData();
         $paymentData->fromJsonResponse($data);
@@ -196,15 +204,16 @@ class PayUnityApi implements LoggerAwareInterface
         return $paymentData;
     }
 
-    private static function createResponseError(RequestException $e): ApiException
+    private function createResponseError(RequestException $e): ApiException
     {
         $response = $e->getResponse();
         if ($response === null) {
             return new ApiException('Unknown error');
         }
-        $data = (string) $response->getBody();
-        $json = json_decode($data, true, 512, JSON_THROW_ON_ERROR);
-        $result = $json['result'];
+        $json = (string) $response->getBody();
+        $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        $this->logger->debug('payunity: parse error response', $data);
+        $result = $data['result'];
         $code = $result['code'];
         $description = $result['description'];
         $message = "[$code] $description";
@@ -218,7 +227,7 @@ class PayUnityApi implements LoggerAwareInterface
     {
         $json = (string) $response->getBody();
         $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        $this->logger->debug('payunity flex service: checkout data response', $data);
+        $this->logger->debug('payunity: checkout data response', $data);
 
         $checkout = new Checkout();
         $checkout->fromJsonResponse($data);
