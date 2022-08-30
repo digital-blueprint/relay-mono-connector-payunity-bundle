@@ -73,6 +73,8 @@ class DbpRelayMonoConnectorPayunityExtension extends ConfigurableExtension imple
             ],
         ]);
 
+        $this->registerEntityManager($container, 'dbp_relay_mono_connector_payunity_bundle');
+
         $container->prependExtensionConfig('doctrine_migrations', [
             'migrations_paths' => [
                 'Dbp\Relay\MonoConnectorPayunityBundle\Migrations' => __DIR__.'/../Migrations',
