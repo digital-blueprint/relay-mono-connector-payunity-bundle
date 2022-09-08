@@ -6,6 +6,8 @@ services:
   Dbp\Relay\MonoConnectorPayunityBundle\Service\PaymentDataService:
     autowire: true
     autoconfigure: true
+    arguments:
+      $em: '@doctrine.orm.dbp_relay_mono_connector_payunity_bundle_entity_manager'
 
   Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityFlexService:
     autowire: true

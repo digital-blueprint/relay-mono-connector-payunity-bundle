@@ -9,7 +9,6 @@ use Dbp\Relay\MonoBundle\Entity\PaymentPersistence;
 use Dbp\Relay\MonoConnectorPayunityBundle\Entity\PaymentDataPersistence;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Checkout;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
@@ -24,12 +23,9 @@ class PaymentDataService implements LoggerAwareInterface
      */
     private $em;
 
-    public function __construct(
-        ManagerRegistry $managerRegistry
-    ) {
-        $manager = $managerRegistry->getManager('dbp_relay_mono_connector_payunity_bundle');
-        assert($manager instanceof EntityManagerInterface);
-        $this->em = $manager;
+    public function __construct(EntityManagerInterface $em)
+    {
+        $this->em = $em;
         $this->logger = new NullLogger();
     }
 
