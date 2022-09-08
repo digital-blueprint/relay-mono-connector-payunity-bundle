@@ -33,6 +33,11 @@ class PaymentDataService implements LoggerAwareInterface
         $this->logger = new NullLogger();
     }
 
+    public function checkConnection()
+    {
+        $this->em->getConnection()->connect();
+    }
+
     public function createPaymentData(PaymentPersistence $payment, Checkout $checkout): void
     {
         $paymentDataPersistence = PaymentDataPersistence::fromPaymentAndCheckout($payment, $checkout);

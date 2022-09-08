@@ -14,10 +14,15 @@ class HealthCheck implements CheckInterface
      * @var PayunityFlexService
      */
     private $payunity;
+    /**
+     * @var PaymentDataService
+     */
+    private $dataService;
 
-    public function __construct(PayunityFlexService $payunity)
+    public function __construct(PayunityFlexService $payunity, PaymentDataService $dataService)
     {
         $this->payunity = $payunity;
+        $this->dataService = $dataService;
     }
 
     public function getName(): string
@@ -46,6 +51,8 @@ class HealthCheck implements CheckInterface
         foreach ($this->payunity->getContracts() as $contract) {
             $results[] = $this->checkMethod('Check if we can connect to the PayUnity API ('.$contract.')', [$this->payunity, 'checkConnection'], [$contract]);
         }
+
+        $results[] = $this->checkMethod('Check if we can connect to the DB', [$this->dataService, 'checkConnection']);
 
         return $results;
     }
