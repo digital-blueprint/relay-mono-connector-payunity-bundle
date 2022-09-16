@@ -250,7 +250,7 @@ class PayUnityApi implements LoggerAwareInterface
     {
         foreach ($array as $key => $value) {
             if (is_array($value)) {
-                $this->anonymize($array[$key]);
+                $this->recursiveAnonymize($array[$key]);
             } else {
                 $array[$key] = str_pad('', strlen($value), '*');
             }
