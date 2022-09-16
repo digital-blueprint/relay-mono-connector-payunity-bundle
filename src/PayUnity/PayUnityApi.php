@@ -196,6 +196,7 @@ class PayUnityApi implements LoggerAwareInterface
     {
         $json = (string) $response->getBody();
         $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        $this->anonymizePaymentResponse($data);
         $this->logger->debug('payunity: get payment status response', $data);
 
         $paymentData = new PaymentData();
@@ -233,5 +234,26 @@ class PayUnityApi implements LoggerAwareInterface
         $checkout->fromJsonResponse($data);
 
         return $checkout;
+    }
+
+    private function anonymizePaymentResponse(array &$data)
+    {
+        if (array_key_exists('bankAccount', $data)) {
+            $this->recursiveAnonymize($data['bankAccount']);
+        }
+        if (array_key_exists('card', $data)) {
+            $this->recursiveAnonymize($data['card']);
+        }
+    }
+
+    private function recursiveAnonymize(array &$array)
+    {
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $this->anonymize($array[$key]);
+            } else {
+                $array[$key] = str_pad('', strlen($value), '*');
+            }
+        }
     }
 }
