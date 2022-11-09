@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\MonoConnectorPayunityBundle\Service;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
+use Dbp\Relay\CoreBundle\Locale\Locale;
 use Dbp\Relay\MonoBundle\Entity\Payment;
 use Dbp\Relay\MonoBundle\Entity\PaymentPersistence;
 use Dbp\Relay\MonoBundle\PaymentServiceProvider\CompleteResponse;
@@ -55,16 +56,23 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
      */
     private $requestStack;
 
+    /**
+     * @var Locale
+     */
+    private $locale;
+
     public function __construct(
         LoggerInterface $logger,
         PaymentDataService $paymentDataService,
         UrlHelper $urlHelper,
-        RequestStack $requestStack
+        RequestStack $requestStack,
+        Locale $locale
     ) {
         $this->paymentDataService = $paymentDataService;
         $this->urlHelper = $urlHelper;
         $this->logger = $logger;
         $this->requestStack = $requestStack;
+        $this->locale = $locale;
     }
 
     /**
@@ -166,13 +174,10 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
         $contractConfig = $this->config['payment_contracts'][$contract];
         $config = $contractConfig['payment_methods_to_widgets'][$method];
 
-        $request = $this->requestStack->getCurrentRequest();
-        $locale = ($request !== null) ? $request->getLocale() : \Locale::getDefault();
-
         $uriTemplate = new UriTemplate($config['widget_url']);
         $uri = (string) $uriTemplate->expand([
             'identifier' => $payment->getIdentifier(),
-            'lang' => \Locale::getPrimaryLanguage($locale) ?? 'en',
+            'lang' => $this->locale->getCurrentPrimaryLanguage(),
         ]);
         $uri = $this->urlHelper->getAbsoluteUrl($uri);
 

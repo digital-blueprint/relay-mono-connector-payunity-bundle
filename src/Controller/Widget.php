@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\MonoConnectorPayunityBundle\Controller;
 
+use Dbp\Relay\CoreBundle\Locale\Locale;
 use Dbp\Relay\MonoBundle\Service\PaymentService;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PaymentType;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Tools;
@@ -37,14 +38,21 @@ class Widget extends AbstractController
      */
     private $paymentDataService;
 
+    /**
+     * @var Locale
+     */
+    private $locale;
+
     public function __construct(
         PaymentService $paymentService,
         PayunityFlexService $payunityFlexService,
-        PaymentDataService $paymentDataService
+        PaymentDataService $paymentDataService,
+        Locale $locale
     ) {
         $this->paymentService = $paymentService;
         $this->payunityFlexService = $payunityFlexService;
         $this->paymentDataService = $paymentDataService;
+        $this->locale = $locale;
     }
 
     /**
@@ -58,14 +66,7 @@ class Widget extends AbstractController
     public function index(Request $request): Response
     {
         $identifier = (string) $request->query->get('identifier');
-        if ($request->query->has('lang')) {
-            $lang = $request->query->get('lang');
-            assert(is_string($lang));
-            $locale = \Locale::acceptFromHttp($lang);
-            if ($locale !== false) {
-                $request->setLocale($locale);
-            }
-        }
+        $this->locale->setCurrentRequestLocaleFromQuery('lang');
 
         $payment = $this->paymentService->getPaymentPersistenceByIdentifier($identifier);
 
@@ -94,7 +95,7 @@ class Widget extends AbstractController
         // payunity supports a list of locales, which more or less match the primary language format,
         // so just use that instead fo hardcoding the list:
         // https://www.payunity.com/tutorials/integration-guide/customisation#optionslang
-        $puLocale = \Locale::getPrimaryLanguage($request->getLocale()) ?? 'en';
+        $puLocale = $this->locale->getCurrentPrimaryLanguage();
 
         $shopperResultUrl = $payment->getPspReturnUrl();
         $brands = $config['brands'];
