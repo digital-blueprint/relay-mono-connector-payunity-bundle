@@ -80,12 +80,26 @@ class Widget extends AbstractController
         $currency = $payment->getCurrency();
         $paymentType = PaymentType::DEBIT;
         $extra = [];
-        $testMode = $contractConfig['test_mode'];
-        if ($testMode === 'internal') {
-            $extra['testMode'] = 'INTERNAL';
-        } elseif ($testMode === 'external') {
-            $extra['testMode'] = 'EXTERNAL';
+
+        // XXX: testMode can only be set for the test environment, or the payment will be rejected.
+        // Let's not require the integrator to deal with this and detect the test environment here.
+        // (Is there a better way to detect the test env besides the host name?)
+        // https://www.payunity.com/reference/parameters#testing
+        $apiUrl = $contractConfig['api_url'];
+        $apiHost = parse_url($apiUrl, PHP_URL_HOST);
+        if ($apiHost === false) {
+            throw new \RuntimeException('Failed to parse API URL: '.$apiUrl);
         }
+        $testHosts = ['eu-test.oppwa.com'];
+        $testMode = $contractConfig['test_mode'];
+        if (in_array($apiHost, $testHosts, true)) {
+            if ($testMode === 'internal') {
+                $extra['testMode'] = 'INTERNAL';
+            } elseif ($testMode === 'external') {
+                $extra['testMode'] = 'EXTERNAL';
+            }
+        }
+
         $checkout = $this->payunityFlexService->postPaymentData($contract, $amount, $currency, $paymentType, $extra);
         $this->paymentDataService->createPaymentData($payment, $checkout);
 

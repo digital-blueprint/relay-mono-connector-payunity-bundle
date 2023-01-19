@@ -35,6 +35,7 @@ class Configuration implements ConfigurationInterface
                                 ->enumNode('test_mode')
                                     // See https://www.payunity.com/reference/parameters#testing
                                     ->values(['internal', 'external'])
+                                    ->info('default is internal')
                                     ->defaultNull()
                                 ->end()
                                 ->arrayNode('payment_methods_to_widgets')
