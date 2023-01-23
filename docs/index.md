@@ -1,7 +1,3 @@
----
-title: Overview
----
-
 # Mono PayUnity Connector
 
 Source: https://gitlab.tugraz.at/dbp/mono/dbp-relay-mono-connector-payunity-bundle
@@ -22,30 +18,14 @@ flowchart LR
 ```
 
 The PayUnity Connector connects mono with [PayUnity](https://www.payunity.com/).
-It allows configuring multiple different payment contracts with PayUnity with
-each different payment methods.
+It allows configuring multiple different payment contracts with PayUnity, each with
+different payment methods.
 
 ## Installation Requirements
 
-* A SQL database like MySQL, PostgreSQL or similar.
+* A MySQL/MariaDB database
+* (for production use) A contract with [PayUnity](https://www.payunity.com/)
 
-## Configuration
+## Documentation
 
-```yaml
-dbp_relay_mono_connector_payunity:
-    database_url:         # Required
-    payment_contracts:    # Required
-        # Prototype
-        -
-            api_url:              ~
-            entity_id:            ~
-            access_token:         ~
-            payment_methods_to_widgets: # Required
-                # Prototype
-                -
-                    name:                 ~
-                    widget_url:           ~
-                    template:             ~
-                    icon_url:             ~
-                    brands:               ~
-```
+* [Configuration](./config.md)
