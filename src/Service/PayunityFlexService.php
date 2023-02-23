@@ -208,15 +208,15 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
             $result = $paymentData->getResult();
 
             if ($result->isSuccessfullyProcessed() || $result->isSuccessfullyProcessedNeedsManualReview()) {
-                $this->auditLogger->error('Setting payment to complete', ['id' => $payment->getIdentifier()]);
+                $this->auditLogger->debug('Setting payment to complete', ['id' => $payment->getIdentifier()]);
                 $payment->setPaymentStatus(Payment::PAYMENT_STATUS_COMPLETED);
                 $completedAt = new \DateTime();
                 $payment->setCompletedAt($completedAt);
             } elseif ($result->isPending() || $result->isPendingExtra()) {
-                $this->auditLogger->error('Setting payment to pending', ['id' => $payment->getIdentifier()]);
+                $this->auditLogger->debug('Setting payment to pending', ['id' => $payment->getIdentifier()]);
                 $payment->setPaymentStatus(Payment::PAYMENT_STATUS_PENDING);
             } else {
-                $this->auditLogger->error('Setting payment to failed', ['id' => $payment->getIdentifier()]);
+                $this->auditLogger->debug('Setting payment to failed', ['id' => $payment->getIdentifier()]);
                 $payment->setPaymentStatus(Payment::PAYMENT_STATUS_FAILED);
             }
         }
