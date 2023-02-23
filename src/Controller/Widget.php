@@ -9,7 +9,7 @@ use Dbp\Relay\MonoBundle\Service\PaymentService;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PaymentType;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Tools;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\PaymentDataService;
-use Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityFlexService;
+use Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,9 +29,9 @@ class Widget extends AbstractController
     private $paymentService;
 
     /**
-     * @var PayunityFlexService
+     * @var PayunityService
      */
-    private $payunityFlexService;
+    private $payunityService;
 
     /**
      * @var PaymentDataService
@@ -45,12 +45,12 @@ class Widget extends AbstractController
 
     public function __construct(
         PaymentService $paymentService,
-        PayunityFlexService $payunityFlexService,
+        PayunityService $payunityService,
         PaymentDataService $paymentDataService,
         Locale $locale
     ) {
         $this->paymentService = $paymentService;
-        $this->payunityFlexService = $payunityFlexService;
+        $this->payunityService = $payunityService;
         $this->paymentDataService = $paymentDataService;
         $this->locale = $locale;
     }
@@ -86,7 +86,7 @@ class Widget extends AbstractController
         } elseif ($testMode === 'external') {
             $extra['testMode'] = 'EXTERNAL';
         }
-        $checkout = $this->payunityFlexService->postPaymentData($contract, $amount, $currency, $paymentType, $extra);
+        $checkout = $this->payunityService->postPaymentData($contract, $amount, $currency, $paymentType, $extra);
         $this->paymentDataService->createPaymentData($payment, $checkout);
 
         $loader = new FilesystemLoader(dirname(__FILE__).'/../Resources/views/');
@@ -100,7 +100,7 @@ class Widget extends AbstractController
         $shopperResultUrl = $payment->getPspReturnUrl();
         $brands = $config['brands'];
         $checkoutId = $checkout->getId();
-        $scriptSrc = $this->payunityFlexService->getPaymentScriptSrc($contract, $checkoutId);
+        $scriptSrc = $this->payunityService->getPaymentScriptSrc($contract, $checkoutId);
         $context = [
             'shopperResultUrl' => $shopperResultUrl,
             'brands' => $brands,

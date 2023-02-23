@@ -11,7 +11,7 @@ use Dbp\Relay\CoreBundle\HealthCheck\CheckResult;
 class HealthCheck implements CheckInterface
 {
     /**
-     * @var PayunityFlexService
+     * @var PayunityService
      */
     private $payunity;
     /**
@@ -19,7 +19,7 @@ class HealthCheck implements CheckInterface
      */
     private $dataService;
 
-    public function __construct(PayunityFlexService $payunity, PaymentDataService $dataService)
+    public function __construct(PayunityService $payunity, PaymentDataService $dataService)
     {
         $this->payunity = $payunity;
         $this->dataService = $dataService;
