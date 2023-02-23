@@ -154,6 +154,29 @@ class PayUnityTest extends TestCase
         $this->assertSame($paymentStatus->getId(), '8ac7a4a282d522f70182d53e7a873640');
     }
 
+    public function testGetPaymentStatusPending()
+    {
+        // This is right after we write the payment into the DB
+        // For some reason this doesn't contain an "id" field
+        $BODY = '{
+    "result": {
+        "code": "000.200.000",
+        "description": "transaction pending"
+    },
+    "buildNumber": "5a79c2746e578c592ec59746fe1310889187c9a7@2023-02-21 15:40:33 +0000",
+    "timestamp": "2023-02-23 10:04:46+0000",
+    "ndc": "15409BA9C90A22D3B6DFCE9885DFF5D1.uat01-vm-tx03"
+}';
+        $this->mockResponses([
+            new Response(200, ['Content-Type' => 'application/json'], $BODY),
+        ]);
+
+        $paymentStatus = $this->api->getPaymentStatus('15409BA9C90A22D3B6DFCE9885DFF5D1');
+        $this->assertNull($paymentStatus->getId());
+        $this->assertFalse($paymentStatus->getResult()->isSuccessfullyProcessed());
+        $this->assertTrue($paymentStatus->getResult()->isPending());
+    }
+
     public function testGetPaymentStatusAfterSuccess()
     {
         $BODY = '{

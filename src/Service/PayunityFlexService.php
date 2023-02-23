@@ -121,7 +121,7 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
         return $startResponse;
     }
 
-    private function getApiByContract(string $contract): PayUnityApi
+    public function getApiByContract(string $contract): PayUnityApi
     {
         if (!array_key_exists($contract, $this->connection)) {
             if (!array_key_exists($contract, $this->config['payment_contracts'])) {

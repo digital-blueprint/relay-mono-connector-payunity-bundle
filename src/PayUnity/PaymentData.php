@@ -11,9 +11,12 @@ class PaymentData
      */
     private $result;
 
+    /**
+     * @var string?
+     */
     private $id;
 
-    public function getId(): string
+    public function getId(): ?string
     {
         return $this->id;
     }
@@ -22,7 +25,7 @@ class PaymentData
     {
         $res = $jsonResponse['result'];
         $this->result = new ResultCode($res['code'], $res['description']);
-        $this->id = $jsonResponse['id'];
+        $this->id = $jsonResponse['id'] ?? null;
     }
 
     public function getResult(): ResultCode
