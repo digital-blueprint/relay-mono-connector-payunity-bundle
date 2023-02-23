@@ -95,7 +95,7 @@ class PayUnityTest extends TestCase
             new Response(400, ['Content-Type' => 'application/json'], $BODY),
         ]);
         $this->expectException(ApiException::class);
-        $this->expectErrorMessage('[200.300.404] invalid or missing parameter');
+        $this->expectExceptionMessage('[200.300.404] invalid or missing parameter');
         $this->api->prepareCheckout('-20.20', 'EUR', PaymentType::DEBIT);
     }
 
@@ -193,7 +193,7 @@ class PayUnityTest extends TestCase
         ]);
 
         $this->expectException(ApiException::class);
-        $this->expectErrorMessage('[200.300.404] invalid or missing parameter - (opp) No payment session found for the requested id - are you mixing test/live servers or have you paid more than 30min ago?');
+        $this->expectExceptionMessage('[200.300.404] invalid or missing parameter - (opp) No payment session found for the requested id - are you mixing test/live servers or have you paid more than 30min ago?');
         $this->api->getPaymentStatus('9929656AD0B361BBC3AF31B3ECDCE28B');
     }
 
@@ -262,7 +262,7 @@ class PayUnityTest extends TestCase
         ]);
 
         $this->expectException(ApiException::class);
-        $this->expectErrorMessage('[700.400.580] cannot find transaction');
+        $this->expectExceptionMessage('[700.400.580] cannot find transaction');
         $this->api->queryPayment('doesntexist');
     }
 
@@ -342,7 +342,7 @@ class PayUnityTest extends TestCase
         ]);
 
         $this->expectException(ApiException::class);
-        $this->expectErrorMessage('[700.400.580] cannot find transaction');
+        $this->expectExceptionMessage('[700.400.580] cannot find transaction');
         $this->api->queryMerchant('doesntexist');
     }
 }
