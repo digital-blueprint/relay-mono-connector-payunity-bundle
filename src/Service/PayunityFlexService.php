@@ -22,6 +22,7 @@ use League\Uri\UriTemplate;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\UrlHelper;
@@ -60,9 +61,12 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
      * @var Locale
      */
     private $locale;
+    /**
+     * @var LoggerInterface
+     */
+    private $auditLogger;
 
     public function __construct(
-        LoggerInterface $logger,
         PaymentDataService $paymentDataService,
         UrlHelper $urlHelper,
         RequestStack $requestStack,
@@ -70,9 +74,15 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
     ) {
         $this->paymentDataService = $paymentDataService;
         $this->urlHelper = $urlHelper;
-        $this->logger = $logger;
         $this->requestStack = $requestStack;
         $this->locale = $locale;
+        $this->logger = new NullLogger();
+        $this->auditLogger = new NullLogger();
+    }
+
+    public function setAuditLogger(LoggerInterface $auditLogger)
+    {
+        $this->auditLogger = $auditLogger;
     }
 
     /**
@@ -144,6 +154,7 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
         $connection->setLogger($this->logger);
         $api = new PayUnityApi($connection);
         $api->setLogger($this->logger);
+        $api->setAuditLogger($this->auditLogger);
 
         return $api;
     }
@@ -197,15 +208,15 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
             $result = $paymentData->getResult();
 
             if ($result->isSuccessfullyProcessed() || $result->isSuccessfullyProcessedNeedsManualReview()) {
-                $this->logger->error('Setting payment to complete', ['id' => $payment->getIdentifier()]);
+                $this->auditLogger->error('Setting payment to complete', ['id' => $payment->getIdentifier()]);
                 $payment->setPaymentStatus(Payment::PAYMENT_STATUS_COMPLETED);
                 $completedAt = new \DateTime();
                 $payment->setCompletedAt($completedAt);
             } elseif ($result->isPending() || $result->isPendingExtra()) {
-                $this->logger->error('Setting payment to pending', ['id' => $payment->getIdentifier()]);
+                $this->auditLogger->error('Setting payment to pending', ['id' => $payment->getIdentifier()]);
                 $payment->setPaymentStatus(Payment::PAYMENT_STATUS_PENDING);
             } else {
-                $this->logger->error('Setting payment to failed', ['id' => $payment->getIdentifier()]);
+                $this->auditLogger->error('Setting payment to failed', ['id' => $payment->getIdentifier()]);
                 $payment->setPaymentStatus(Payment::PAYMENT_STATUS_FAILED);
             }
         }

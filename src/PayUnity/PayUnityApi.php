@@ -9,6 +9,7 @@ use League\Uri\UriTemplate;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 class PayUnityApi implements LoggerAwareInterface
@@ -20,10 +21,21 @@ class PayUnityApi implements LoggerAwareInterface
      */
     private $connection;
 
+    /**
+     * @var LoggerInterface
+     */
+    private $auditLogger;
+
     public function __construct(Connection $connection)
     {
         $this->connection = $connection;
         $this->logger = new NullLogger();
+        $this->auditLogger = new NullLogger();
+    }
+
+    public function setAuditLogger(LoggerInterface $auditLogger)
+    {
+        $this->auditLogger = $auditLogger;
     }
 
     /**
@@ -54,7 +66,7 @@ class PayUnityApi implements LoggerAwareInterface
             $data[$key] = $value;
         }
 
-        $this->logger->debug('payunity: prepare checkout', $data);
+        $this->auditLogger->debug('payunity: prepare checkout', $data);
 
         try {
             $response = $client->post(
@@ -97,7 +109,7 @@ class PayUnityApi implements LoggerAwareInterface
         $client = $this->connection->getClient();
         $entityId = $connection->getEntityId();
 
-        $this->logger->debug('payunity: get payment status');
+        $this->auditLogger->debug('payunity: get payment status');
 
         $uriTemplate = new UriTemplate('v1/checkouts/{checkoutId}/payment{?entityId}');
         $uri = (string) $uriTemplate->expand([
@@ -128,7 +140,7 @@ class PayUnityApi implements LoggerAwareInterface
         $client = $this->connection->getClient();
         $entityId = $connection->getEntityId();
 
-        $this->logger->debug('payunity: query payment');
+        $this->auditLogger->debug('payunity: query payment');
 
         $uriTemplate = new UriTemplate('v1/query/{paymentId}{?entityId}');
         $uri = (string) $uriTemplate->expand([
@@ -161,7 +173,7 @@ class PayUnityApi implements LoggerAwareInterface
         $client = $this->connection->getClient();
         $entityId = $connection->getEntityId();
 
-        $this->logger->debug('payunity: query merchant');
+        $this->auditLogger->debug('payunity: query merchant');
 
         $uriTemplate = new UriTemplate('v1/query{?entityId,merchantTransactionId}');
         $uri = (string) $uriTemplate->expand([
@@ -184,7 +196,7 @@ class PayUnityApi implements LoggerAwareInterface
     {
         $json = (string) $response->getBody();
         $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        $this->logger->debug('payunity: get payment list response', $data);
+        $this->auditLogger->debug('payunity: get payment list response', $data);
 
         $paymentList = new PaymentList();
         $paymentList->fromJsonResponse($data);
@@ -197,7 +209,7 @@ class PayUnityApi implements LoggerAwareInterface
         $json = (string) $response->getBody();
         $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         $this->anonymizePaymentResponse($data);
-        $this->logger->debug('payunity: get payment status response', $data);
+        $this->auditLogger->debug('payunity: get payment status response', $data);
 
         $paymentData = new PaymentData();
         $paymentData->fromJsonResponse($data);
@@ -213,7 +225,7 @@ class PayUnityApi implements LoggerAwareInterface
         }
         $json = (string) $response->getBody();
         $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        $this->logger->debug('payunity: parse error response', $data);
+        $this->auditLogger->debug('payunity: parse error response', $data);
         $result = $data['result'];
         $code = $result['code'];
         $description = $result['description'];
@@ -228,7 +240,7 @@ class PayUnityApi implements LoggerAwareInterface
     {
         $json = (string) $response->getBody();
         $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        $this->logger->debug('payunity: checkout data response', $data);
+        $this->auditLogger->debug('payunity: checkout data response', $data);
 
         $checkout = new Checkout();
         $checkout->fromJsonResponse($data);
