@@ -1,7 +1,9 @@
 # DbpRelayMonoConnectorPayunityBundle
 
-[GitLab](https://gitlab.tugraz.at/dbp/relay/dbp-relay-mono-connector-payunity-bundle) |
+[GitHub](https://github.com/digital-blueprint/relay-mono-connector-payunity-bundle) |
 [Packagist](https://packagist.org/packages/dbp/relay-mono-connector-payunity-bundle)
+
+Electronic Payments Symfony Connector Bundle for Payunity
 
 ## Bundle installation
 
