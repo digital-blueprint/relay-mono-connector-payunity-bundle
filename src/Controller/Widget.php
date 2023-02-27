@@ -86,6 +86,11 @@ class Widget extends AbstractController
         } elseif ($testMode === 'external') {
             $extra['testMode'] = 'EXTERNAL';
         }
+
+        // This allows us to (manually) connect our payment entry with the transaction in the payunity web interface
+        // even if the payment gets canceled or never finished.
+        $extra['merchantTransactionId'] = $payment->getIdentifier();
+
         $checkout = $this->payunityService->postPaymentData($contract, $amount, $currency, $paymentType, $extra);
         $this->paymentDataService->createPaymentData($payment, $checkout);
 
