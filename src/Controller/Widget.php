@@ -8,7 +8,6 @@ use Dbp\Relay\CoreBundle\Locale\Locale;
 use Dbp\Relay\MonoBundle\Service\PaymentService;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PaymentType;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Tools;
-use Dbp\Relay\MonoConnectorPayunityBundle\Service\PaymentDataService;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,11 +33,6 @@ class Widget extends AbstractController
     private $payunityService;
 
     /**
-     * @var PaymentDataService
-     */
-    private $paymentDataService;
-
-    /**
      * @var Locale
      */
     private $locale;
@@ -46,12 +40,10 @@ class Widget extends AbstractController
     public function __construct(
         PaymentService $paymentService,
         PayunityService $payunityService,
-        PaymentDataService $paymentDataService,
         Locale $locale
     ) {
         $this->paymentService = $paymentService;
         $this->payunityService = $payunityService;
-        $this->paymentDataService = $paymentDataService;
         $this->locale = $locale;
     }
 
@@ -91,8 +83,7 @@ class Widget extends AbstractController
         // even if the payment gets canceled or never finished.
         $extra['merchantTransactionId'] = $payment->getIdentifier();
 
-        $checkout = $this->payunityService->postPaymentData($contract, $amount, $currency, $paymentType, $extra);
-        $this->paymentDataService->createPaymentData($payment, $checkout);
+        $checkout = $this->payunityService->prepareCheckout($payment, $contract, $amount, $currency, $paymentType, $extra);
 
         $loader = new FilesystemLoader(dirname(__FILE__).'/../Resources/views/');
         $twig = new Environment($loader);

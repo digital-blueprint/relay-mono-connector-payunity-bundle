@@ -21,15 +21,10 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
      * @var PayunityService
      */
     private $payunity;
-    /**
-     * @var PaymentDataService
-     */
-    private $paymentDataService;
 
-    public function __construct(PaymentDataService $paymentDataService, PayunityService $payunity)
+    public function __construct(PayunityService $payunity)
     {
         $this->payunity = $payunity;
-        $this->paymentDataService = $paymentDataService;
     }
 
     public function start(PaymentPersistence &$payment): StartResponseInterface
@@ -54,7 +49,7 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
 
     public function cleanup(PaymentPersistence &$payment): bool
     {
-        $this->paymentDataService->cleanupByPaymentIdentifier($payment->getIdentifier());
+        $this->payunity->cleanupPaymentData($payment);
 
         return true;
     }

@@ -146,16 +146,20 @@ class PayunityService implements LoggerAwareInterface
         return $api->getPaymentScriptSrc($checkoutId);
     }
 
-    public function postPaymentData(string $contract, string $amount, string $currency, string $paymentType, array $extra = []): Checkout
+    public function prepareCheckout(PaymentPersistence $payment, string $contract, string $amount, string $currency, string $paymentType, array $extra = []): Checkout
     {
         $api = $this->getApiByContract($contract);
 
         try {
-            return $api->prepareCheckout($amount, $currency, $paymentType, $extra);
+            $checkout = $api->prepareCheckout($amount, $currency, $paymentType, $extra);
         } catch (ApiException $e) {
             $this->logger->error('Communication error with payment service provider!', ['exception' => $e]);
             throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, 'Communication error with payment service provider!');
         }
+
+        $this->paymentDataService->createPaymentData($payment, $checkout);
+
+        return $checkout;
     }
 
     public function getWidgetUrl(PaymentPersistence $payment): string
@@ -200,6 +204,14 @@ class PayunityService implements LoggerAwareInterface
                 $payment->setPaymentStatus(Payment::PAYMENT_STATUS_FAILED);
             }
         }
+    }
+
+    /**
+     * Delete everything related to the passed payment in the connector.
+     */
+    public function cleanupPaymentData(PaymentPersistence $payment): void
+    {
+        $this->paymentDataService->cleanupByPaymentIdentifier($payment->getIdentifier());
     }
 
     private function getCheckoutPaymentData(string $contract, string $checkoutId): PaymentData
