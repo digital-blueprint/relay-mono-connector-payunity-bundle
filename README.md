@@ -3,7 +3,7 @@
 [GitHub](https://github.com/digital-blueprint/relay-mono-connector-payunity-bundle) |
 [Packagist](https://packagist.org/packages/dbp/relay-mono-connector-payunity-bundle)
 
-Electronic Payments Symfony Connector Bundle for Payunity
+A PayUnity connector for the mono bundle for the Relay API gateway
 
 ## Bundle installation
 

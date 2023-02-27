@@ -1,3 +1,7 @@
+# v0.1.2
+
+* Migration to GitHub
+
 # v0.1.1
 
 * Fix an error in the payment status check if the payment wasn't started by the user yet
