@@ -96,7 +96,7 @@ class Widget extends AbstractController
         $shopperResultUrl = $payment->getPspReturnUrl();
         $brands = $config['brands'];
         $checkoutId = $checkout->getId();
-        $scriptSrc = $this->payunityService->getPaymentScriptSrc($contract, $checkoutId);
+        $scriptSrc = $this->payunityService->getPaymentScriptSrc($payment, $contract, $checkoutId);
         $context = [
             'shopperResultUrl' => $shopperResultUrl,
             'brands' => $brands,

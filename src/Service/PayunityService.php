@@ -98,7 +98,7 @@ class PayunityService implements LoggerAwareInterface
 
     public function checkConnection($contract): void
     {
-        $api = $this->getApiByContract($contract);
+        $api = $this->getApiByContract($contract, null);
         try {
             $api->queryMerchant(Uuid::v4()->toRfc4122());
         } catch (ApiException $e) {
@@ -111,7 +111,12 @@ class PayunityService implements LoggerAwareInterface
         }
     }
 
-    public function getApiByContract(string $contract): PayUnityApi
+    private function getLoggingContext(PaymentPersistence $payment): array
+    {
+        return ['relay-mono-payment-id' => $payment->getIdentifier()];
+    }
+
+    public function getApiByContract(string $contract, ?PaymentPersistence $payment): PayUnityApi
     {
         if (!array_key_exists($contract, $this->connection)) {
             if (!array_key_exists($contract, $this->config['payment_contracts'])) {
@@ -135,20 +140,23 @@ class PayunityService implements LoggerAwareInterface
         $api = new PayUnityApi($connection);
         $api->setLogger($this->logger);
         $api->setAuditLogger($this->auditLogger);
+        if ($payment !== null) {
+            $api->setLoggingContext($this->getLoggingContext($payment));
+        }
 
         return $api;
     }
 
-    public function getPaymentScriptSrc(string $contract, string $checkoutId): string
+    public function getPaymentScriptSrc(PaymentPersistence $payment, string $contract, string $checkoutId): string
     {
-        $api = $this->getApiByContract($contract);
+        $api = $this->getApiByContract($contract, $payment);
 
         return $api->getPaymentScriptSrc($checkoutId);
     }
 
     public function prepareCheckout(PaymentPersistence $payment, string $contract, string $amount, string $currency, string $paymentType, array $extra = []): Checkout
     {
-        $api = $this->getApiByContract($contract);
+        $api = $this->getApiByContract($contract, $payment);
 
         try {
             $checkout = $api->prepareCheckout($amount, $currency, $paymentType, $extra);
@@ -186,21 +194,21 @@ class PayunityService implements LoggerAwareInterface
 
         if ($payment->getPaymentStatus() === Payment::PAYMENT_STATUS_COMPLETED) {
         } else {
-            $paymentData = $this->getCheckoutPaymentData($contract, $paymentDataPersisted->getPspIdentifier());
+            $paymentData = $this->getCheckoutPaymentData($payment, $contract, $paymentDataPersisted->getPspIdentifier());
 
             // https://payunity.docs.oppwa.com/reference/resultCodes
             $result = $paymentData->getResult();
 
             if ($result->isSuccessfullyProcessed() || $result->isSuccessfullyProcessedNeedsManualReview()) {
-                $this->auditLogger->debug('Setting payment to complete', ['id' => $payment->getIdentifier()]);
+                $this->auditLogger->debug('payunity: Setting payment to complete', $this->getLoggingContext($payment));
                 $payment->setPaymentStatus(Payment::PAYMENT_STATUS_COMPLETED);
                 $completedAt = new \DateTime();
                 $payment->setCompletedAt($completedAt);
             } elseif ($result->isPending() || $result->isPendingExtra()) {
-                $this->auditLogger->debug('Setting payment to pending', ['id' => $payment->getIdentifier()]);
+                $this->auditLogger->debug('payunity: Setting payment to pending', $this->getLoggingContext($payment));
                 $payment->setPaymentStatus(Payment::PAYMENT_STATUS_PENDING);
             } else {
-                $this->auditLogger->debug('Setting payment to failed', ['id' => $payment->getIdentifier()]);
+                $this->auditLogger->debug('payunity: Setting payment to failed', $this->getLoggingContext($payment));
                 $payment->setPaymentStatus(Payment::PAYMENT_STATUS_FAILED);
             }
         }
@@ -211,12 +219,13 @@ class PayunityService implements LoggerAwareInterface
      */
     public function cleanupPaymentData(PaymentPersistence $payment): void
     {
+        $this->auditLogger->debug('payunity: clean up payment data', $this->getLoggingContext($payment));
         $this->paymentDataService->cleanupByPaymentIdentifier($payment->getIdentifier());
     }
 
-    private function getCheckoutPaymentData(string $contract, string $checkoutId): PaymentData
+    private function getCheckoutPaymentData(PaymentPersistence $payment, string $contract, string $checkoutId): PaymentData
     {
-        $api = $this->getApiByContract($contract);
+        $api = $this->getApiByContract($contract, $payment);
         try {
             return $api->getPaymentStatus($checkoutId);
         } catch (ApiException $e) {
