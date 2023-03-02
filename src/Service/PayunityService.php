@@ -6,8 +6,8 @@ namespace Dbp\Relay\MonoConnectorPayunityBundle\Service;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Locale\Locale;
-use Dbp\Relay\MonoBundle\Entity\Payment;
 use Dbp\Relay\MonoBundle\Entity\PaymentPersistence;
+use Dbp\Relay\MonoBundle\Entity\PaymentStatus;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\ApiException;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Checkout;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Connection;
@@ -192,7 +192,7 @@ class PayunityService implements LoggerAwareInterface
         $contract = $payment->getPaymentContract();
         $paymentDataPersisted = $this->paymentDataService->getByPaymentIdentifier($payment->getIdentifier());
 
-        if ($payment->getPaymentStatus() === Payment::PAYMENT_STATUS_COMPLETED) {
+        if ($payment->getPaymentStatus() === PaymentStatus::COMPLETED) {
         } else {
             $paymentData = $this->getCheckoutPaymentData($payment, $contract, $paymentDataPersisted->getPspIdentifier());
 
@@ -201,15 +201,15 @@ class PayunityService implements LoggerAwareInterface
 
             if ($result->isSuccessfullyProcessed() || $result->isSuccessfullyProcessedNeedsManualReview()) {
                 $this->auditLogger->debug('payunity: Setting payment to complete', $this->getLoggingContext($payment));
-                $payment->setPaymentStatus(Payment::PAYMENT_STATUS_COMPLETED);
+                $payment->setPaymentStatus(PaymentStatus::COMPLETED);
                 $completedAt = new \DateTime();
                 $payment->setCompletedAt($completedAt);
             } elseif ($result->isPending() || $result->isPendingExtra()) {
                 $this->auditLogger->debug('payunity: Setting payment to pending', $this->getLoggingContext($payment));
-                $payment->setPaymentStatus(Payment::PAYMENT_STATUS_PENDING);
+                $payment->setPaymentStatus(PaymentStatus::PENDING);
             } else {
                 $this->auditLogger->debug('payunity: Setting payment to failed', $this->getLoggingContext($payment));
-                $payment->setPaymentStatus(Payment::PAYMENT_STATUS_FAILED);
+                $payment->setPaymentStatus(PaymentStatus::FAILED);
             }
         }
     }
