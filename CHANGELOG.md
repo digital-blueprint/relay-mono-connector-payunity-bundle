@@ -1,3 +1,8 @@
+# v0.1.4
+
+* Some cleanup
+* composer: add a pre-commit hook for linting
+
 # v0.1.3
 
 * Always set a `merchantTransactionId` when creating a checkout. This ID shows up in the main PUMA transaction list, and also allows the payment to be queried using the reporting API in the future.
