@@ -27,9 +27,9 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
         $this->payunity = $payunity;
     }
 
-    public function start(PaymentPersistence &$payment): StartResponseInterface
+    public function start(PaymentPersistence $paymentPersistence): StartResponseInterface
     {
-        $widgetUrl = $this->payunity->getWidgetUrl($payment);
+        $widgetUrl = $this->payunity->getWidgetUrl($paymentPersistence);
         $data = null;
         $error = null;
 
@@ -40,16 +40,16 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
         );
     }
 
-    public function complete(PaymentPersistence &$payment, string $pspData): CompleteResponseInterface
+    public function complete(PaymentPersistence $paymentPersistence, string $pspData): CompleteResponseInterface
     {
-        $this->payunity->checkComplete($payment);
+        $this->payunity->checkComplete($paymentPersistence);
 
-        return new CompleteResponse($payment->getReturnUrl());
+        return new CompleteResponse($paymentPersistence->getReturnUrl());
     }
 
-    public function cleanup(PaymentPersistence &$payment): bool
+    public function cleanup(PaymentPersistence $paymentPersistence): bool
     {
-        $this->payunity->cleanupPaymentData($payment);
+        $this->payunity->cleanupPaymentData($paymentPersistence);
 
         return true;
     }
