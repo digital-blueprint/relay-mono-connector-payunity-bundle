@@ -40,6 +40,11 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
         );
     }
 
+    public function getPaymentIdForPspData(string $pspData): ?string
+    {
+        return $this->payunity->getPaymentIdForPspData($pspData);
+    }
+
     public function complete(PaymentPersistence $paymentPersistence, string $pspData): CompleteResponseInterface
     {
         $this->payunity->checkComplete($paymentPersistence);

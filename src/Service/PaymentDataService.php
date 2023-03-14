@@ -67,6 +67,22 @@ class PaymentDataService implements LoggerAwareInterface
         return $paymentDataPersistence;
     }
 
+    public function getByCheckoutId(string $checkoutId): PaymentDataPersistence
+    {
+        /** @var PaymentDataPersistence $paymentDataPersistence */
+        $paymentDataPersistence = $this->em
+            ->getRepository(PaymentDataPersistence::class)
+            ->findOneBy([
+                'pspIdentifier' => $checkoutId,
+            ]);
+
+        if (!$paymentDataPersistence) {
+            throw ApiError::withDetails(Response::HTTP_NOT_FOUND, 'Payment data was not found!', 'mono:payment-data-not-found');
+        }
+
+        return $paymentDataPersistence;
+    }
+
     public function cleanupByPaymentIdentifier(string $paymentIdentifier)
     {
         $paymentDataPersistences = $this->em

@@ -9,6 +9,7 @@ use Dbp\Relay\MonoBundle\Service\PaymentService;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PaymentType;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Tools;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityService;
+use Dbp\Relay\MonoConnectorPayunityBundle\Service\Utils;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -93,7 +94,7 @@ class Widget extends AbstractController
         // https://www.payunity.com/tutorials/integration-guide/customisation#optionslang
         $puLocale = $this->locale->getCurrentPrimaryLanguage();
 
-        $shopperResultUrl = $payment->getPspReturnUrl();
+        $shopperResultUrl = Utils::extendReturnUrl($payment->getPspReturnUrl());
         $brands = $config['brands'];
         $checkoutId = $checkout->getId();
         $scriptSrc = $this->payunityService->getPaymentScriptSrc($payment, $contract, $checkoutId);

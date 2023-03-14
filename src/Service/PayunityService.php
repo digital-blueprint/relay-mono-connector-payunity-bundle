@@ -96,6 +96,23 @@ class PayunityService implements LoggerAwareInterface
         return array_keys($this->config['payment_contracts']);
     }
 
+    public function getPaymentIdForPspData(string $pspData): ?string
+    {
+        // First check if the PSP data is for us, null means we don't handle it
+        if (!Utils::isPayunityPspData($pspData)) {
+            return null;
+        }
+
+        // Then extract the checkoudID
+        $checkoutId = Utils::extractCheckoutIdFromPspData($pspData);
+        if ($checkoutId === false) {
+            throw new ApiError(Response::HTTP_BAD_REQUEST, 'Invalid PSP data');
+        }
+
+        // Then map it to the payment ID and return that to the mono bundle
+        return $this->paymentDataService->getByCheckoutId($checkoutId)->getPaymentIdentifier();
+    }
+
     public function checkConnection($contract): void
     {
         $api = $this->getApiByContract($contract, null);
