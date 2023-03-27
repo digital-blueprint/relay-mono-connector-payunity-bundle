@@ -36,6 +36,9 @@ class Configuration implements ConfigurationInterface
                                 ->scalarNode('access_token')
                                     ->info('The access token provided by payunity')
                                 ->end()
+                                ->scalarNode('webhook_secret')
+                                    ->info('The WebHook secret provided by payunity')
+                                ->end()
                                 ->enumNode('test_mode')
                                     ->info('If an internal or external test system should be used. Only allowed to be set with the test server.')
                                     // See https://www.payunity.com/reference/parameters#testing
