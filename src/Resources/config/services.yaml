@@ -22,6 +22,12 @@ services:
     autoconfigure: true
     public: true
 
+  Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityWebhookService:
+    autowire: true
+    autoconfigure: true
+    calls:
+      - setAuditLogger: [ '@monolog.logger.dbp_relay_mono_audit' ]
+
   Dbp\Relay\MonoConnectorPayunityBundle\Service\HealthCheck:
     autowire: true
     autoconfigure: true

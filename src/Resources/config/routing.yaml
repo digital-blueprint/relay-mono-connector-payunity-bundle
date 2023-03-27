@@ -3,3 +3,9 @@ dbp_relay_mono_connector_payunity_bundle:
   methods: ['GET']
   defaults:
     _controller: Dbp\Relay\MonoConnectorPayunityBundle\Controller\Widget::index
+
+dbp_relay_mono_connector_payunity_bundle_webhook:
+  path: /mono-connector-payunity/webhook/{contract}
+  methods: ['POST']
+  defaults:
+    _controller: Dbp\Relay\MonoConnectorPayunityBundle\Controller\Webhook::index
