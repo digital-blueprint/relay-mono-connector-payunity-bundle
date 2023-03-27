@@ -21,6 +21,8 @@ use Psr\Log\NullLogger;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\UrlHelper;
+use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Lock\LockInterface;
 use Symfony\Component\Uid\Uuid;
 
 class PayunityService implements LoggerAwareInterface
@@ -56,6 +58,12 @@ class PayunityService implements LoggerAwareInterface
      * @var Locale
      */
     private $locale;
+
+    /**
+     * @var LockFactory
+     */
+    private $lockFactory;
+
     /**
      * @var LoggerInterface
      */
@@ -65,12 +73,14 @@ class PayunityService implements LoggerAwareInterface
         PaymentDataService $paymentDataService,
         UrlHelper $urlHelper,
         RequestStack $requestStack,
-        Locale $locale
+        Locale $locale,
+        LockFactory $lockFactory
     ) {
         $this->paymentDataService = $paymentDataService;
         $this->urlHelper = $urlHelper;
         $this->requestStack = $requestStack;
         $this->locale = $locale;
+        $this->lockFactory = $lockFactory;
         $this->logger = new NullLogger();
         $this->auditLogger = new NullLogger();
     }
@@ -86,6 +96,16 @@ class PayunityService implements LoggerAwareInterface
     public function setConfig(array $config)
     {
         $this->config = $config;
+    }
+
+    private function createPaymentLock(PaymentPersistence $payment): LockInterface
+    {
+        $resourceKey = sprintf(
+            'mono-connector-payunity-%s',
+            $payment->getIdentifier()
+        );
+
+        return $this->lockFactory->createLock($resourceKey, 60, true);
     }
 
     /**
@@ -206,6 +226,9 @@ class PayunityService implements LoggerAwareInterface
 
     public function checkComplete(PaymentPersistence $payment): void
     {
+        $lock = $this->createPaymentLock($payment);
+        $lock->acquire(true);
+
         $contract = $payment->getPaymentContract();
         $paymentDataPersisted = $this->paymentDataService->getByPaymentIdentifier($payment->getIdentifier());
 
@@ -229,6 +252,8 @@ class PayunityService implements LoggerAwareInterface
                 $payment->setPaymentStatus(PaymentStatus::FAILED);
             }
         }
+
+        $lock->release();
     }
 
     /**
