@@ -1,5 +1,13 @@
 services:
+  Dbp\Relay\MonoConnectorPayunityBundle\Controller\Webhook:
+    autowire: true
+    autoconfigure: true
+
   Dbp\Relay\MonoConnectorPayunityBundle\Controller\Widget:
+    autowire: true
+    autoconfigure: true
+
+  Dbp\Relay\MonoConnectorPayunityBundle\Service\ConfigurationService:
     autowire: true
     autoconfigure: true
 
