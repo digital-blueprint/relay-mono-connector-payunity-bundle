@@ -13,7 +13,8 @@
         "league/uri": "^6.5",
         "symfony/framework-bundle": "^5.4",
         "symfony/orm-pack": "^2.2",
-        "symfony/uid": "^5.4"
+        "symfony/uid": "^5.4",
+        "ext-openssl": "*"
     },
     "require-dev": {
         "brainmaestro/composer-git-hooks": "^2.8",
