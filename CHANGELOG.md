@@ -1,3 +1,8 @@
+# v0.1.7
+
+* Added support for payunity webhook callbacks. This requires a `webhook_secret`
+  being set via the bundle configuration.
+
 # v0.1.6
 
 * Compatibility with mono-bundle v0.3
