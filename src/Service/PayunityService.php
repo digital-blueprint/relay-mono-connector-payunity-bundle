@@ -229,31 +229,33 @@ class PayunityService implements LoggerAwareInterface
         $lock = $this->createPaymentLock($payment);
         $lock->acquire(true);
 
-        $contract = $payment->getPaymentContract();
-        $paymentDataPersisted = $this->paymentDataService->getByPaymentIdentifier($payment->getIdentifier());
+        try {
+            $contract = $payment->getPaymentContract();
+            $paymentDataPersisted = $this->paymentDataService->getByPaymentIdentifier($payment->getIdentifier());
 
-        if ($payment->getPaymentStatus() === PaymentStatus::COMPLETED) {
-        } else {
-            $paymentData = $this->getCheckoutPaymentData($payment, $contract, $paymentDataPersisted->getPspIdentifier());
-
-            // https://payunity.docs.oppwa.com/reference/resultCodes
-            $result = $paymentData->getResult();
-
-            if ($result->isSuccessfullyProcessed() || $result->isSuccessfullyProcessedNeedsManualReview()) {
-                $this->auditLogger->debug('payunity: Setting payment to complete', $this->getLoggingContext($payment));
-                $payment->setPaymentStatus(PaymentStatus::COMPLETED);
-                $completedAt = new \DateTime();
-                $payment->setCompletedAt($completedAt);
-            } elseif ($result->isPending() || $result->isPendingExtra()) {
-                $this->auditLogger->debug('payunity: Setting payment to pending', $this->getLoggingContext($payment));
-                $payment->setPaymentStatus(PaymentStatus::PENDING);
+            if ($payment->getPaymentStatus() === PaymentStatus::COMPLETED) {
             } else {
-                $this->auditLogger->debug('payunity: Setting payment to failed', $this->getLoggingContext($payment));
-                $payment->setPaymentStatus(PaymentStatus::FAILED);
-            }
-        }
+                $paymentData = $this->getCheckoutPaymentData($payment, $contract, $paymentDataPersisted->getPspIdentifier());
 
-        $lock->release();
+                // https://payunity.docs.oppwa.com/reference/resultCodes
+                $result = $paymentData->getResult();
+
+                if ($result->isSuccessfullyProcessed() || $result->isSuccessfullyProcessedNeedsManualReview()) {
+                    $this->auditLogger->debug('payunity: Setting payment to complete', $this->getLoggingContext($payment));
+                    $payment->setPaymentStatus(PaymentStatus::COMPLETED);
+                    $completedAt = new \DateTime();
+                    $payment->setCompletedAt($completedAt);
+                } elseif ($result->isPending() || $result->isPendingExtra()) {
+                    $this->auditLogger->debug('payunity: Setting payment to pending', $this->getLoggingContext($payment));
+                    $payment->setPaymentStatus(PaymentStatus::PENDING);
+                } else {
+                    $this->auditLogger->debug('payunity: Setting payment to failed', $this->getLoggingContext($payment));
+                    $payment->setPaymentStatus(PaymentStatus::FAILED);
+                }
+            }
+        } finally {
+            $lock->release();
+        }
     }
 
     /**
