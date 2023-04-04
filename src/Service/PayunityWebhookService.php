@@ -51,6 +51,10 @@ class PayunityWebhookService implements LoggerAwareInterface
         $binData = array_map('hex2bin', $hexData);
 
         $json = openssl_decrypt($binData['data'], 'aes-256-gcm', $binData['key'], OPENSSL_RAW_DATA, $binData['iv'], $binData['authTag']);
+        if ($json === false) {
+            $this->auditLogger->debug('payunity: webhook decryption failed');
+            throw new \RuntimeException('Decryption failed');
+        }
         $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         $this->auditLogger->debug('payunity: webhook request data', $data);
 
