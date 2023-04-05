@@ -1,3 +1,8 @@
+# v0.1.8
+
+* Improved input validation for webhook requests
+* Added health check for webhook secret format
+
 # v0.1.7
 
 * Added support for payunity webhook callbacks. This requires a `webhook_secret`
