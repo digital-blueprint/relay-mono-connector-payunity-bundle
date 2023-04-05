@@ -90,11 +90,10 @@ class PayunityWebhookService implements LoggerAwareInterface
         }
         $this->auditLogger->debug('payunity: webhook request data', $data);
 
-        $webhookRequest = new WebhookRequest();
-        $webhookRequest->setType($data['type'] ?? null);
-        $webhookRequest->setAction($data['action'] ?? null);
-        $webhookRequest->setPayload($data['payload'] ?? null);
+        if (!is_string($data['type'] ?? null) || !is_array($data['payload'] ?? null)) {
+            throw new BadRequestHttpException('Invalid webhook payload');
+        }
 
-        return $webhookRequest;
+        return new WebhookRequest($data['type'], $data['action'] ?? null, $data['payload']);
     }
 }

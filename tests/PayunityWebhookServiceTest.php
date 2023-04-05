@@ -120,4 +120,17 @@ class PayunityWebhookServiceTest extends TestCase
         $this->expectException(BadRequestHttpException::class);
         $service->decryptRequest($contract, $request);
     }
+
+    public function testMissingPayloadKeys()
+    {
+        $secret = 'foobar';
+        $request = $this->createRequest('{}', $secret);
+
+        $contract = new PaymentContract();
+        $contract->setWebhookSecret(bin2hex($secret));
+
+        $service = new PayunityWebhookService();
+        $this->expectException(BadRequestHttpException::class);
+        $service->decryptRequest($contract, $request);
+    }
 }
