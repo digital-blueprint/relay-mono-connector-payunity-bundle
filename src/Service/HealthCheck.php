@@ -18,11 +18,16 @@ class HealthCheck implements CheckInterface
      * @var PaymentDataService
      */
     private $dataService;
+    /**
+     * @var ConfigurationService
+     */
+    private $config;
 
-    public function __construct(PayunityService $payunity, PaymentDataService $dataService)
+    public function __construct(PayunityService $payunity, PaymentDataService $dataService, ConfigurationService $config)
     {
         $this->payunity = $payunity;
         $this->dataService = $dataService;
+        $this->config = $config;
     }
 
     public function getName(): string
@@ -53,6 +58,8 @@ class HealthCheck implements CheckInterface
         }
 
         $results[] = $this->checkMethod('Check if we can connect to the DB', [$this->dataService, 'checkConnection']);
+
+        $results[] = $this->checkMethod('Check contract config', [$this->config, 'checkConfig']);
 
         return $results;
     }

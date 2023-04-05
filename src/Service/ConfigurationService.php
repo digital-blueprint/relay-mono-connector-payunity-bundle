@@ -40,4 +40,29 @@ class ConfigurationService
 
         return $paymentContract;
     }
+
+    public function checkConfig()
+    {
+        foreach ($this->getPaymentContracts() as $contract) {
+            $secret = $contract->getWebhookSecret();
+            // make sure the secret is in the right format
+            if (@hex2bin($secret) === false) {
+                throw new \RuntimeException('Invalid webhook secret format');
+            }
+        }
+    }
+
+    /**
+     * @return PaymentContract[]
+     */
+    public function getPaymentContracts(): array
+    {
+        $contracts = [];
+        $config = $this->config['payment_contracts'] ?? [];
+        foreach ($config as $identifier => $paymentContractConfig) {
+            $contracts[] = PaymentContract::fromConfig($identifier, $paymentContractConfig);
+        }
+
+        return $contracts;
+    }
 }
