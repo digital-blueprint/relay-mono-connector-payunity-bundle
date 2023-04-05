@@ -133,4 +133,18 @@ class PayunityWebhookServiceTest extends TestCase
         $this->expectException(BadRequestHttpException::class);
         $service->decryptRequest($contract, $request);
     }
+
+    public function testInvalidIv()
+    {
+        $secret = 'foobar';
+        $request = $this->createRequest('{}', $secret);
+        $request->headers->set('X-Initialization-Vector', 'invalid');
+
+        $contract = new PaymentContract();
+        $contract->setWebhookSecret(bin2hex($secret));
+
+        $service = new PayunityWebhookService();
+        $this->expectException(BadRequestHttpException::class);
+        $service->decryptRequest($contract, $request);
+    }
 }

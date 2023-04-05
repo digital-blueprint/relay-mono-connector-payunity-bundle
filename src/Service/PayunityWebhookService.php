@@ -59,20 +59,20 @@ class PayunityWebhookService implements LoggerAwareInterface
             'data' => $dataHex,
         ]);
 
-        $iv = hex2bin($ivHex);
+        $iv = @hex2bin($ivHex);
         if ($iv === false) {
             throw new BadRequestHttpException('Invalid value for X-Initialization-Vector header');
         }
-        $authTag = hex2bin($authTagHex);
+        $authTag = @hex2bin($authTagHex);
         if ($authTag === false) {
             throw new BadRequestHttpException('Invalid value for X-Authentication-Tag header');
         }
-        $data = hex2bin($dataHex);
+        $data = @hex2bin($dataHex);
         if ($data === false) {
             throw new BadRequestHttpException('Invalid request body');
         }
 
-        $key = hex2bin($paymentContract->getWebhookSecret());
+        $key = @hex2bin($paymentContract->getWebhookSecret());
         if ($key === false) {
             throw new \RuntimeException('invalid secret');
         }
