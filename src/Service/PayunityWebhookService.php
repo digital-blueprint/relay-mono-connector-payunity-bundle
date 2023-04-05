@@ -91,10 +91,9 @@ class PayunityWebhookService implements LoggerAwareInterface
         $this->auditLogger->debug('payunity: webhook request data', $data);
 
         $webhookRequest = new WebhookRequest();
-        foreach ($data as $propertyName => $propertyValue) {
-            $setter = 'set'.ucfirst($propertyName);
-            $webhookRequest->{$setter}($propertyValue);
-        }
+        $webhookRequest->setType($data['type'] ?? null);
+        $webhookRequest->setAction($data['action'] ?? null);
+        $webhookRequest->setPayload($data['payload'] ?? null);
 
         return $webhookRequest;
     }
