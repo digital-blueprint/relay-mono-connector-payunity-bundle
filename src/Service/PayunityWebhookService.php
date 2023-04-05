@@ -11,6 +11,7 @@ use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class PayunityWebhookService implements LoggerAwareInterface
 {
@@ -39,23 +40,54 @@ class PayunityWebhookService implements LoggerAwareInterface
 
     public function decryptRequest(PaymentContract $paymentContract, Request $request): WebhookRequest
     {
-        $hexData = [
-            'iv' => $request->headers->get('X-Initialization-Vector'),
-            'authTag' => $request->headers->get('X-Authentication-Tag'),
-            'data' => $request->getContent(),
-        ];
-        $this->auditLogger->debug('payunity: webhook request hex-data', $hexData);
+        $ivHex = $request->headers->get('X-Initialization-Vector');
+        if ($ivHex === null) {
+            throw new BadRequestHttpException('Missing X-Initialization-Vector header');
+        }
+        $authTagHex = $request->headers->get('X-Authentication-Tag');
+        if ($authTagHex === null) {
+            throw new BadRequestHttpException('Missing X-Authentication-Tag header');
+        }
+        $dataHex = $request->getContent();
+        if ($dataHex === null) {
+            throw new BadRequestHttpException('Missing payload');
+        }
 
-        $hexData['key'] = $paymentContract->getWebhookSecret();
+        $this->auditLogger->debug('payunity: webhook request hex-data', [
+            'iv' => $ivHex,
+            'authTag' => $authTagHex,
+            'data' => $dataHex,
+        ]);
 
-        $binData = array_map('hex2bin', $hexData);
+        $iv = hex2bin($ivHex);
+        if ($iv === false) {
+            throw new BadRequestHttpException('Invalid value for X-Initialization-Vector header');
+        }
+        $authTag = hex2bin($authTagHex);
+        if ($authTag === false) {
+            throw new BadRequestHttpException('Invalid value for X-Authentication-Tag header');
+        }
+        $data = hex2bin($dataHex);
+        if ($data === false) {
+            throw new BadRequestHttpException('Invalid request body');
+        }
 
-        $json = openssl_decrypt($binData['data'], 'aes-256-gcm', $binData['key'], OPENSSL_RAW_DATA, $binData['iv'], $binData['authTag']);
+        $key = hex2bin($paymentContract->getWebhookSecret());
+        if ($key === false) {
+            throw new \RuntimeException('invalid secret');
+        }
+
+        $json = \openssl_decrypt($data, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $authTag);
         if ($json === false) {
             $this->auditLogger->debug('payunity: webhook decryption failed');
-            throw new \RuntimeException('Decryption failed');
+            throw new BadRequestHttpException('Invalid request');
         }
-        $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        try {
+            $data = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            $this->logger->error('json decode failed', ['exception' => $e]);
+            throw new BadRequestHttpException('Invalid webhook payload');
+        }
         $this->auditLogger->debug('payunity: webhook request data', $data);
 
         $webhookRequest = new WebhookRequest();
