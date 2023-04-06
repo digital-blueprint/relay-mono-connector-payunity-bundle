@@ -49,7 +49,7 @@ class PaymentDataService implements LoggerAwareInterface
         }
     }
 
-    public function getByPaymentIdentifier(string $paymentIdentifier)
+    public function getByPaymentIdentifier(string $paymentIdentifier): PaymentDataPersistence
     {
         /** @var PaymentDataPersistence $paymentDataPersistence */
         $paymentDataPersistence = $this->em
@@ -83,7 +83,7 @@ class PaymentDataService implements LoggerAwareInterface
         return $paymentDataPersistence;
     }
 
-    public function cleanupByPaymentIdentifier(string $paymentIdentifier)
+    public function cleanupByPaymentIdentifier(string $paymentIdentifier): void
     {
         $paymentDataPersistences = $this->em
             ->getRepository(PaymentDataPersistence::class)
