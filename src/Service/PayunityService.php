@@ -129,8 +129,13 @@ class PayunityService implements LoggerAwareInterface
             throw new ApiError(Response::HTTP_BAD_REQUEST, 'Invalid PSP data');
         }
 
+        $paymentDataPersistence = $this->paymentDataService->getByCheckoutId($checkoutId);
+        if (!$paymentDataPersistence) {
+            throw ApiError::withDetails(Response::HTTP_NOT_FOUND, 'Payment data was not found!', 'mono:payment-data-not-found');
+        }
+
         // Then map it to the payment ID and return that to the mono bundle
-        return $this->paymentDataService->getByCheckoutId($checkoutId)->getPaymentIdentifier();
+        return $paymentDataPersistence->getPaymentIdentifier();
     }
 
     public function checkConnection($contract): void
@@ -202,7 +207,12 @@ class PayunityService implements LoggerAwareInterface
             throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, 'Communication error with payment service provider!');
         }
 
-        $this->paymentDataService->createPaymentData($payment, $checkout);
+        try {
+            $this->paymentDataService->createPaymentData($payment, $checkout);
+        } catch (\Exception $e) {
+            $this->logger->error('Payment data could not be created!', ['exception' => $e]);
+            throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, 'Payment data could not be created!');
+        }
 
         return $checkout;
     }
@@ -232,6 +242,9 @@ class PayunityService implements LoggerAwareInterface
         try {
             $contract = $payment->getPaymentContract();
             $paymentDataPersisted = $this->paymentDataService->getByPaymentIdentifier($payment->getIdentifier());
+            if ($paymentDataPersisted === null) {
+                throw ApiError::withDetails(Response::HTTP_NOT_FOUND, 'Payment data was not found!', 'mono:payment-data-not-found');
+            }
 
             if ($payment->getPaymentStatus() === PaymentStatus::COMPLETED) {
             } else {

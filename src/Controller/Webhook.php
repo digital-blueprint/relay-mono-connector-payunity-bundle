@@ -79,8 +79,15 @@ class Webhook extends AbstractController implements LoggerAwareInterface
 
             // fallback, if merchantTransactionId is not submitted
             if (!$identifier) {
-                $checkoutId = $pspDataArray['ndc'];
+                $this->logger->debug('No merchantTransactionId found, falling back');
+                $checkoutId = $pspDataArray['ndc'] ?? null;
+                if ($checkoutId === null) {
+                    throw new BadRequestHttpException('Checkout ID missing');
+                }
                 $paymentData = $this->paymentDataService->getByCheckoutId($checkoutId);
+                if ($paymentData === null) {
+                    throw new BadRequestHttpException('Unknown checkout ID: '.$checkoutId);
+                }
                 $identifier = $paymentData->getPaymentIdentifier();
             }
 

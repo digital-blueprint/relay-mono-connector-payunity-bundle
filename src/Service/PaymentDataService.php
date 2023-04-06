@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\MonoConnectorPayunityBundle\Service;
 
-use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\MonoBundle\Entity\PaymentPersistence;
 use Dbp\Relay\MonoConnectorPayunityBundle\Entity\PaymentDataPersistence;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Checkout;
@@ -12,7 +11,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
-use Symfony\Component\HttpFoundation\Response;
 
 class PaymentDataService implements LoggerAwareInterface
 {
@@ -39,17 +37,11 @@ class PaymentDataService implements LoggerAwareInterface
         $paymentDataPersistence = PaymentDataPersistence::fromPaymentAndCheckout($payment, $checkout);
         $createdAt = new \DateTime();
         $paymentDataPersistence->setCreatedAt($createdAt);
-
-        try {
-            $this->em->persist($paymentDataPersistence);
-            $this->em->flush();
-        } catch (\Exception $e) {
-            $this->logger->error('Payment data could not be created!', ['exception' => $e]);
-            throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, 'Payment data could not be created!');
-        }
+        $this->em->persist($paymentDataPersistence);
+        $this->em->flush();
     }
 
-    public function getByPaymentIdentifier(string $paymentIdentifier): PaymentDataPersistence
+    public function getByPaymentIdentifier(string $paymentIdentifier): ?PaymentDataPersistence
     {
         /** @var PaymentDataPersistence $paymentDataPersistence */
         $paymentDataPersistence = $this->em
@@ -60,14 +52,10 @@ class PaymentDataService implements LoggerAwareInterface
                 'createdAt' => 'DESC',
             ]);
 
-        if (!$paymentDataPersistence) {
-            throw ApiError::withDetails(Response::HTTP_NOT_FOUND, 'Payment data was not found!', 'mono:payment-data-not-found');
-        }
-
         return $paymentDataPersistence;
     }
 
-    public function getByCheckoutId(string $checkoutId): PaymentDataPersistence
+    public function getByCheckoutId(string $checkoutId): ?PaymentDataPersistence
     {
         /** @var PaymentDataPersistence $paymentDataPersistence */
         $paymentDataPersistence = $this->em
@@ -75,10 +63,6 @@ class PaymentDataService implements LoggerAwareInterface
             ->findOneBy([
                 'pspIdentifier' => $checkoutId,
             ]);
-
-        if (!$paymentDataPersistence) {
-            throw ApiError::withDetails(Response::HTTP_NOT_FOUND, 'Payment data was not found!', 'mono:payment-data-not-found');
-        }
 
         return $paymentDataPersistence;
     }
