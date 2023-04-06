@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dbp\Relay\MonoConnectorPayunityBundle\Tests;
 
 use Dbp\Relay\MonoConnectorPayunityBundle\Entity\PaymentContract;
+use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\WebhookRequest;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityWebhookService;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
@@ -58,6 +59,20 @@ class PayunityWebhookServiceTest extends TestCase
    }
 }';
 
+    // This gets sent to the webhook when the admin tests it via the BIP/PU.MA web interface
+    private const INTEGRATION_TEST_MODE_PAYLOAD = '
+{
+    "type": "test",
+    "action": "webhook activation",
+    "payload": {
+        "result": {
+            "code": "000.100.110",
+            "description": "Request successfully processed in \'Merchant in Integrator Test Mode\'"
+        }
+    }
+}
+    ';
+
     private function createRequest(string $jsonPayload, string $secret): Request
     {
         $ivLen = \openssl_cipher_iv_length('aes-256-gcm');
@@ -80,7 +95,7 @@ class PayunityWebhookServiceTest extends TestCase
 
         $service = new PayunityWebhookService();
         $result = $service->decryptRequest($contract, $request);
-        $this->assertSame('PAYMENT', $result->getType());
+        $this->assertSame(WebhookRequest::TYPE_PAYMENT, $result->getType());
         $pspDataArray = $result->getPayload();
         $this->assertSame('8a8294174b7ecb28014b9699220015ca_66b12f658442479c8ca66166c4999e78', $pspDataArray['ndc']);
     }
@@ -146,5 +161,18 @@ class PayunityWebhookServiceTest extends TestCase
         $service = new PayunityWebhookService();
         $this->expectException(BadRequestHttpException::class);
         $service->decryptRequest($contract, $request);
+    }
+
+    public function testIntegrationTestsPayload()
+    {
+        $secret = 'foobar';
+        $request = $this->createRequest(self::INTEGRATION_TEST_MODE_PAYLOAD, $secret);
+
+        $contract = new PaymentContract();
+        $contract->setWebhookSecret(bin2hex($secret));
+
+        $service = new PayunityWebhookService();
+        $result = $service->decryptRequest($contract, $request);
+        $this->assertSame(WebhookRequest::TYPE_TEST, $result->getType());
     }
 }

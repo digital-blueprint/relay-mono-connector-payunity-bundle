@@ -20,6 +20,12 @@ class WebhookRequest
     public const TYPE_RISK = 'RISK';
 
     /**
+     * This gets sent as a test to see if webhooks are working. It doesn't seem
+     * to be documented.
+     */
+    public const TYPE_TEST = 'test';
+
+    /**
      * when registration has been created.
      */
     public const ACTION_CREATED = 'CREATED';
