@@ -1,3 +1,7 @@
+# v0.1.9
+
+* webhooks: correctly handle test webhook messages
+
 # v0.1.8
 
 * Improved input validation for webhook requests
