@@ -73,6 +73,66 @@ class PayunityWebhookServiceTest extends TestCase
 }
     ';
 
+    // This is a real payload we got, using test data only, partly anonymized.
+    // This contains "merchantTransactionId" for example, which we set, but isn't in the example from the docs
+    private const REAL_PAYLOAD = '
+  {
+    "type": "PAYMENT",
+    "payload": {
+        "id": "8ac7a4a28751bbd2018756de795a02eb",
+        "paymentType": "DB",
+        "paymentBrand": "VISA",
+        "amount": "20.20",
+        "currency": "EUR",
+        "presentationAmount": "20.20",
+        "presentationCurrency": "EUR",
+        "descriptor": "2526.4602.5082 flex.something.something ",
+        "merchantTransactionId": "792217c5-cf4c-45a4-bc9b-17ba8d7a6926",
+        "result": {
+            "code": "000.100.112",
+            "description": "Request successfully processed in \'Merchant in Connector Test Mode\'",
+            "randomField2071906327": "Please allow for new unexpected fields to be added"
+        },
+        "resultDetails": {
+            "ExtendedDescription": "Approved or completed successfully",
+            "AcquirerResponse": "00",
+            "reconciliationId": "(removed)",
+            "ConnectorTxID1": "394156",
+            "ConnectorTxID3": "71E00629"
+        },
+        "card": {
+            "bin": "420000",
+            "last4Digits": "0000",
+            "holder": "adad",
+            "expiryMonth": "12",
+            "expiryYear": "2042"
+        },
+        "customer": {
+            "ip": "(removed)"
+        },
+        "authentication": {
+            "entityId": "(removed)"
+        },
+        "customParameters": {
+            "SHOPPER_EndToEndIdentity": "(removed)",
+            "CTPE_DESCRIPTOR_TEMPLATE": ""
+        },
+        "redirect": {
+            "parameters": []
+        },
+        "risk": {
+            "score": "100"
+        },
+        "timestamp": "2023-04-06 14:00:33+0000",
+        "ndc": "(removed).uat01-vm-tx04",
+        "merchantAccountId": "(removed)",
+        "channelName": "flex.something.something",
+        "source": "OPPUI",
+        "loyaltyIndicator": "(removed)"
+    }
+}
+    ';
+
     public function testDecrypt()
     {
         $secret = 'foobar';
@@ -164,5 +224,19 @@ class PayunityWebhookServiceTest extends TestCase
         $request = $service->createRequest($contract, self::INTEGRATION_TEST_MODE_PAYLOAD);
         $result = $service->decryptRequest($contract, $request);
         $this->assertSame(WebhookRequest::TYPE_TEST, $result->getType());
+    }
+
+    public function testRealPayload()
+    {
+        $secret = 'foobar';
+
+        $contract = new PaymentContract();
+        $contract->setWebhookSecret(bin2hex($secret));
+
+        $service = new PayunityWebhookService();
+        $request = $service->createRequest($contract, self::REAL_PAYLOAD);
+        $result = $service->decryptRequest($contract, $request);
+        $this->assertSame(WebhookRequest::TYPE_PAYMENT, $result->getType());
+        $this->assertSame('792217c5-cf4c-45a4-bc9b-17ba8d7a6926', $result->getPayload()['merchantTransactionId']);
     }
 }

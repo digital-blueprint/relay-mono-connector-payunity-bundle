@@ -16,6 +16,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class Webhook extends AbstractController implements LoggerAwareInterface
 {
@@ -56,37 +57,48 @@ class Webhook extends AbstractController implements LoggerAwareInterface
 
     public function index(Request $request, string $contract): Response
     {
-        $response = new JsonResponse();
-
         $paymentContract = $this->configurationService->getPaymentContractByIdentifier($contract);
+        if ($paymentContract === null) {
+            throw new BadRequestHttpException('Unknown contract: '.$contract);
+        }
         $webhookRequest = $this->payunityWebhookService->decryptRequest(
             $paymentContract,
             $request
         );
 
-        // In case of a test we do nothing and just return "success"
+        $this->logger->debug('Handling webhook of type: '.$webhookRequest->getType());
+
         if ($webhookRequest->getType() === WebhookRequest::TYPE_TEST) {
+            // In case of a test we do nothing and just return "success"
             $this->logger->debug('Test webhook detected, returning success');
 
-            return $response;
+            return new JsonResponse();
+        } elseif ($webhookRequest->getType() === WebhookRequest::TYPE_PAYMENT) {
+            $pspDataArray = $webhookRequest->getPayload();
+            $identifier = $pspDataArray['merchantTransactionId'] ?? null;
+
+            // fallback, if merchantTransactionId is not submitted
+            if (!$identifier) {
+                $checkoutId = $pspDataArray['ndc'];
+                $paymentData = $this->paymentDataService->getByCheckoutId($checkoutId);
+                $identifier = $paymentData->getPaymentIdentifier();
+            }
+
+            $pspData = json_encode($pspDataArray);
+            $this->paymentService->completePayAction(
+                $identifier,
+                $pspData
+            );
+
+            return new JsonResponse();
+        } elseif ($webhookRequest->getType() === WebhookRequest::TYPE_RISK) {
+            // Nothing to do
+            return new JsonResponse();
+        } elseif ($webhookRequest->getType() === WebhookRequest::TYPE_REGISTRATION) {
+            // Nothing to do
+            return new JsonResponse();
+        } else {
+            throw new BadRequestHttpException('Unknown webhook type: '.$webhookRequest->getType());
         }
-
-        $pspDataArray = $webhookRequest->getPayload();
-        $identifier = $pspDataArray['merchantTransactionId'];
-
-        // fallback, if merchantTransactionId is not submitted
-        if (!$identifier) {
-            $checkoutId = $pspDataArray['ndc'];
-            $paymentData = $this->paymentDataService->getByCheckoutId($checkoutId);
-            $identifier = $paymentData->getPaymentIdentifier();
-        }
-
-        $pspData = json_encode($pspDataArray);
-        $this->paymentService->completePayAction(
-            $identifier,
-            $pspData
-        );
-
-        return $response;
     }
 }
