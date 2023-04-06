@@ -32,6 +32,10 @@ services:
     autowire: true
     autoconfigure: true
 
+  Dbp\Relay\MonoConnectorPayunityBundle\Command\WebhookCommand:
+    autowire: true
+    autoconfigure: true
+
   Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityService:
     autowire: true
     autoconfigure: true

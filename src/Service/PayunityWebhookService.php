@@ -38,6 +38,28 @@ class PayunityWebhookService implements LoggerAwareInterface
         $this->auditLogger = $auditLogger;
     }
 
+    /**
+     * Create a webhook request, mostly for testing pruposes.
+     */
+    public function createRequest(PaymentContract $paymentContract, string $jsonPayload): Request
+    {
+        $ivLen = \openssl_cipher_iv_length('aes-256-gcm');
+        $iv = \openssl_random_pseudo_bytes($ivLen);
+        $key = @hex2bin($paymentContract->getWebhookSecret());
+        if ($key === false) {
+            throw new \RuntimeException('invalid secret');
+        }
+        $encrypted = \openssl_encrypt($jsonPayload, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
+        if ($encrypted === false) {
+            throw new \RuntimeException();
+        }
+        $request = new Request([], [], [], [], [], [], bin2hex($encrypted));
+        $request->headers->set('X-Initialization-Vector', bin2hex($iv));
+        $request->headers->set('X-Authentication-Tag', bin2hex($tag));
+
+        return $request;
+    }
+
     public function decryptRequest(PaymentContract $paymentContract, Request $request): WebhookRequest
     {
         $ivHex = $request->headers->get('X-Initialization-Vector');

@@ -9,8 +9,7 @@ A PayUnity connector for the mono bundle for the Relay API gateway
 
 ## Requirements
 
-Activation of Webhooks by PayUnity support is strictly recommended.
-The path for the configuration is `/mono-connector-payunity/webhook/{$keyOfPaymentContract}` (for the configuration example below: `/mono-connector-payunity/webhook/payunity_flex_studienservice`).
+Activation of Webhooks by PayUnity support is strictly recommended. See the documentation for details.
 
 ## Bundle installation
 

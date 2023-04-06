@@ -135,7 +135,7 @@ class PaymentContract
         $paymentContract->setApiUrl((string) $config['api_url']);
         $paymentContract->setEntityId((string) $config['entity_id']);
         $paymentContract->setAccessToken((string) $config['access_token']);
-        $paymentContract->setWebhookSecret((string) $config['webhook_secret']);
+        $paymentContract->setWebhookSecret($config['webhook_secret'] ?? '');
         $paymentContract->setTestMode((string) $config['test_mode']);
         $paymentContract->setPaymentMethodsToWidgets((array) $config['payment_methods_to_widgets']);
 

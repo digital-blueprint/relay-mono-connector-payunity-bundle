@@ -73,27 +73,14 @@ class PayunityWebhookServiceTest extends TestCase
 }
     ';
 
-    private function createRequest(string $jsonPayload, string $secret): Request
-    {
-        $ivLen = \openssl_cipher_iv_length('aes-256-gcm');
-        $iv = \openssl_random_pseudo_bytes($ivLen);
-        $encrypted = \openssl_encrypt($jsonPayload, 'aes-256-gcm', $secret, OPENSSL_RAW_DATA, $iv, $tag);
-        $this->assertNotFalse($encrypted);
-        $request = new Request([], [], [], [], [], [], bin2hex($encrypted));
-        $request->headers->set('X-Initialization-Vector', bin2hex($iv));
-        $request->headers->set('X-Authentication-Tag', bin2hex($tag));
-
-        return $request;
-    }
-
     public function testDecrypt()
     {
         $secret = 'foobar';
-        $request = $this->createRequest(self::EXAMPLE_PAYLOAD, $secret);
         $contract = new PaymentContract();
         $contract->setWebhookSecret(bin2hex($secret));
 
         $service = new PayunityWebhookService();
+        $request = $service->createRequest($contract, self::EXAMPLE_PAYLOAD);
         $result = $service->decryptRequest($contract, $request);
         $this->assertSame(WebhookRequest::TYPE_PAYMENT, $result->getType());
         $pspDataArray = $result->getPayload();
@@ -113,12 +100,15 @@ class PayunityWebhookServiceTest extends TestCase
     public function testWrongSecret()
     {
         $secret = 'foobar';
-        $request = $this->createRequest(self::EXAMPLE_PAYLOAD, $secret);
+        $service = new PayunityWebhookService();
+
+        $contract = new PaymentContract();
+        $contract->setWebhookSecret(bin2hex($secret));
+        $request = $service->createRequest($contract, self::EXAMPLE_PAYLOAD);
 
         $contract = new PaymentContract();
         $contract->setWebhookSecret(bin2hex('this-is-the-wrong-one'));
 
-        $service = new PayunityWebhookService();
         $this->expectException(BadRequestHttpException::class);
         $service->decryptRequest($contract, $request);
     }
@@ -126,12 +116,12 @@ class PayunityWebhookServiceTest extends TestCase
     public function testInvalidPayload()
     {
         $secret = 'foobar';
-        $request = $this->createRequest('nope', $secret);
 
         $contract = new PaymentContract();
         $contract->setWebhookSecret(bin2hex($secret));
 
         $service = new PayunityWebhookService();
+        $request = $service->createRequest($contract, 'nope');
         $this->expectException(BadRequestHttpException::class);
         $service->decryptRequest($contract, $request);
     }
@@ -139,12 +129,12 @@ class PayunityWebhookServiceTest extends TestCase
     public function testMissingPayloadKeys()
     {
         $secret = 'foobar';
-        $request = $this->createRequest('{}', $secret);
 
         $contract = new PaymentContract();
         $contract->setWebhookSecret(bin2hex($secret));
 
         $service = new PayunityWebhookService();
+        $request = $service->createRequest($contract, '{}');
         $this->expectException(BadRequestHttpException::class);
         $service->decryptRequest($contract, $request);
     }
@@ -152,13 +142,13 @@ class PayunityWebhookServiceTest extends TestCase
     public function testInvalidIv()
     {
         $secret = 'foobar';
-        $request = $this->createRequest('{}', $secret);
-        $request->headers->set('X-Initialization-Vector', 'invalid');
 
         $contract = new PaymentContract();
         $contract->setWebhookSecret(bin2hex($secret));
 
         $service = new PayunityWebhookService();
+        $request = $service->createRequest($contract, '{}');
+        $request->headers->set('X-Initialization-Vector', 'invalid');
         $this->expectException(BadRequestHttpException::class);
         $service->decryptRequest($contract, $request);
     }
@@ -166,12 +156,12 @@ class PayunityWebhookServiceTest extends TestCase
     public function testIntegrationTestsPayload()
     {
         $secret = 'foobar';
-        $request = $this->createRequest(self::INTEGRATION_TEST_MODE_PAYLOAD, $secret);
 
         $contract = new PaymentContract();
         $contract->setWebhookSecret(bin2hex($secret));
 
         $service = new PayunityWebhookService();
+        $request = $service->createRequest($contract, self::INTEGRATION_TEST_MODE_PAYLOAD);
         $result = $service->decryptRequest($contract, $request);
         $this->assertSame(WebhookRequest::TYPE_TEST, $result->getType());
     }

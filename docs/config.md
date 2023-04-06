@@ -33,3 +33,14 @@ dbp_relay_mono_connector_payunity:
 ## Test Mode
 
 * `test_mode` is not allowed to be set when the payunity production server is configured, or payments will fail, see https://www.payunity.com/reference/parameters#testing
+
+## Web Hook
+
+You can use the `dbp:relay-mono-connector-payunity:webhook-info` to see the URL you need to forward to PayUnity the webhook registration:
+
+```console
+./bin/console dbp:relay-mono-connector-payunity:webhook-info payunity_flex_studienservice
+Webhook URL for PayUnity:
+
+http://localhost:8000/mono-connector-payunity/webhook/payunity_flex_studienservice
+```
