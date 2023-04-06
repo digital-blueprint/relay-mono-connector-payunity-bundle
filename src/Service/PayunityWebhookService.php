@@ -71,9 +71,6 @@ class PayunityWebhookService implements LoggerAwareInterface
             throw new BadRequestHttpException('Missing X-Authentication-Tag header');
         }
         $dataHex = $request->getContent();
-        if ($dataHex === null) {
-            throw new BadRequestHttpException('Missing payload');
-        }
 
         $this->auditLogger->debug('payunity: webhook request hex-data', [
             'iv' => $ivHex,

@@ -18,7 +18,6 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\UrlHelper;
 use Symfony\Component\Lock\LockFactory;
@@ -50,11 +49,6 @@ class PayunityService implements LoggerAwareInterface
     private $urlHelper;
 
     /**
-     * @var RequestStack
-     */
-    private $requestStack;
-
-    /**
      * @var Locale
      */
     private $locale;
@@ -72,13 +66,11 @@ class PayunityService implements LoggerAwareInterface
     public function __construct(
         PaymentDataService $paymentDataService,
         UrlHelper $urlHelper,
-        RequestStack $requestStack,
         Locale $locale,
         LockFactory $lockFactory
     ) {
         $this->paymentDataService = $paymentDataService;
         $this->urlHelper = $urlHelper;
-        $this->requestStack = $requestStack;
         $this->locale = $locale;
         $this->lockFactory = $lockFactory;
         $this->logger = new NullLogger();
