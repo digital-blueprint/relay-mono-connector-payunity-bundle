@@ -35,8 +35,8 @@ class PaymentDataService implements LoggerAwareInterface
     public function createPaymentData(PaymentPersistence $payment, Checkout $checkout): void
     {
         $paymentDataPersistence = PaymentDataPersistence::fromPaymentAndCheckout($payment, $checkout);
-        $createdAt = new \DateTime();
-        $paymentDataPersistence->setCreatedAt($createdAt);
+        $now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+        $paymentDataPersistence->setCreatedAt($now);
         $this->em->persist($paymentDataPersistence);
         $this->em->flush();
     }

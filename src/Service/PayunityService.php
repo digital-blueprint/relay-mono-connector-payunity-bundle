@@ -248,8 +248,8 @@ class PayunityService implements LoggerAwareInterface
                 if ($result->isSuccessfullyProcessed() || $result->isSuccessfullyProcessedNeedsManualReview()) {
                     $this->auditLogger->debug('payunity: Setting payment to complete', $this->getLoggingContext($payment));
                     $payment->setPaymentStatus(PaymentStatus::COMPLETED);
-                    $completedAt = new \DateTime();
-                    $payment->setCompletedAt($completedAt);
+                    $now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+                    $payment->setCompletedAt($now);
                 } elseif ($result->isPending() || $result->isPendingExtra()) {
                     $this->auditLogger->debug('payunity: Setting payment to pending', $this->getLoggingContext($payment));
                     $payment->setPaymentStatus(PaymentStatus::PENDING);
