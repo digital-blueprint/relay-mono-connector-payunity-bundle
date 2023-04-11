@@ -10,7 +10,10 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="mono_connector_payunity_payments")
+ * @ORM\Table(name="mono_connector_payunity_payments", indexes={
+ *     @ORM\Index(name="payment_identifier_idx", fields={"paymentIdentifier"}),
+ *     @ORM\Index(name="psp_identifier_idx", fields={"pspIdentifier"}),
+ * })
  */
 class PaymentDataPersistence
 {
