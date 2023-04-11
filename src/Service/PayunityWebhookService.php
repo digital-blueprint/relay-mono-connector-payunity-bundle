@@ -22,18 +22,13 @@ class PayunityWebhookService implements LoggerAwareInterface
      */
     private $auditLogger;
 
-    /**
-     * @var ConfigurationService
-     */
-    protected $configurationService;
-
     public function __construct()
     {
         $this->logger = new NullLogger();
         $this->auditLogger = new NullLogger();
     }
 
-    public function setAuditLogger(LoggerInterface $auditLogger)
+    public function setAuditLogger(LoggerInterface $auditLogger): void
     {
         $this->auditLogger = $auditLogger;
     }

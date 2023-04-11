@@ -12,7 +12,7 @@ class PaymentData
     private $result;
 
     /**
-     * @var string?
+     * @var ?string
      */
     private $id;
 

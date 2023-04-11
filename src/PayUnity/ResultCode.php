@@ -34,7 +34,7 @@ class ResultCode
         return $this->description;
     }
 
-    private function matches(string $pattern)
+    private function matches(string $pattern): bool
     {
         $res = preg_match($pattern, $this->code);
         assert($res !== false);

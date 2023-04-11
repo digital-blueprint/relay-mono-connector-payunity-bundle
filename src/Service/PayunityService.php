@@ -77,15 +77,12 @@ class PayunityService implements LoggerAwareInterface
         $this->auditLogger = new NullLogger();
     }
 
-    public function setAuditLogger(LoggerInterface $auditLogger)
+    public function setAuditLogger(LoggerInterface $auditLogger): void
     {
         $this->auditLogger = $auditLogger;
     }
 
-    /**
-     * @return void
-     */
-    public function setConfig(array $config)
+    public function setConfig(array $config): void
     {
         $this->config = $config;
     }

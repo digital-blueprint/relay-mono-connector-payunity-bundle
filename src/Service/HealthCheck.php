@@ -35,6 +35,9 @@ class HealthCheck implements CheckInterface
         return 'mono-connector-payunity';
     }
 
+    /**
+     * @param array<mixed> $args
+     */
     private function checkMethod(string $description, callable $func, array $args = []): CheckResult
     {
         $result = new CheckResult($description);

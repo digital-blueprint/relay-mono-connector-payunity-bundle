@@ -15,6 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
 class PaymentDataPersistence
 {
     /**
+     * @var int
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")

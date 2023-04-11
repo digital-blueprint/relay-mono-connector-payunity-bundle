@@ -17,9 +17,13 @@ class Connection implements LoggerAwareInterface
     private $apiUrl;
     private $entityId;
     private $accessToken;
+
+    /**
+     * @var ?callable
+     */
     private $clientHandler;
 
-    public function __construct($apiUrl, $entityId, $accessToken)
+    public function __construct(string $apiUrl, string $entityId, string $accessToken)
     {
         $this->apiUrl = $apiUrl;
         $this->entityId = $entityId;
@@ -27,7 +31,7 @@ class Connection implements LoggerAwareInterface
         $this->logger = new NullLogger();
     }
 
-    public function setClientHandler(?object $handler): void
+    public function setClientHandler(?callable $handler): void
     {
         $this->clientHandler = $handler;
     }

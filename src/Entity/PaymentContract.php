@@ -131,7 +131,7 @@ class PaymentContract
     public static function fromConfig(string $identifier, array $config): PaymentContract
     {
         $paymentContract = new PaymentContract();
-        $paymentContract->setIdentifier((string) $identifier);
+        $paymentContract->setIdentifier($identifier);
         $paymentContract->setApiUrl((string) $config['api_url']);
         $paymentContract->setEntityId((string) $config['entity_id']);
         $paymentContract->setAccessToken((string) $config['access_token']);
