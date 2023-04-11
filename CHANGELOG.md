@@ -1,3 +1,8 @@
+# v0.1.11
+
+* Documentation cleanup
+* Some database schema improvements
+
 # v0.1.10
 
 * New `dbp:relay-mono-connector-payunity:webhook-info` CLI command which shows information about the webhooks (URL for registration and example curl calls)

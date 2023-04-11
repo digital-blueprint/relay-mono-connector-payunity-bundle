@@ -30,6 +30,36 @@ dbp_relay_mono_connector_payunity:
                     brands:               ~
 ```
 
+Example configuration:
+
+```yaml
+dbp_relay_mono_connector_payunity:
+  database_url: '%env(resolve:DATABASE_URL)%'
+  payment_contracts:
+    payunity_flex_studienservice:
+      api_url: '%env(resolve:MONO_CONNECTOR_PAYUNITY_API_URL)%'
+      entity_id: '%env(MONO_CONNECTOR_PAYUNITY_ENTITY_ID)%'
+      access_token: '%env(MONO_CONNECTOR_PAYUNITY_ACCESS_TOKEN)%'
+      webhook_secret: '%env(MONO_CONNECTOR_PAYUNITY_WEBHOOK_SECRET)%'
+      payment_methods_to_widgets:
+        payunity_creditcard:
+          widget_url: '/mono-connector-payunity/widget?identifier={identifier}&lang={lang}'
+          template: 'index.html.twig'
+          brands: 'AMEX DINERS DISCOVER JCB MASTER VISA'
+        payunity_applepay:
+          widget_url: '/mono-connector-payunity/widget?identifier={identifier}&lang={lang}'
+          template: 'applepay.html.twig'
+          brands: 'APPLEPAY'
+        payunity_googlepay:
+          widget_url: '/mono-connector-payunity/widget?identifier={identifier}&lang={lang}'
+          template: 'index.html.twig'
+          brands: 'GOOGLEPAY'
+        payunity_sofortueberweisung:
+          widget_url: '/mono-connector-payunity/widget?identifier={identifier}&lang={lang}'
+          template: 'index.html.twig'
+          brands: 'SOFORTUEBERWEISUNG'
+```
+
 ## Test Mode
 
 * `test_mode` is not allowed to be set when the payunity production server is configured, or payments will fail, see https://www.payunity.com/reference/parameters#testing
