@@ -1,3 +1,8 @@
+# v0.1.10
+
+* New `dbp:relay-mono-connector-payunity:webhook-info` CLI command which shows information about the webhooks (URL for registration and example curl calls)
+* Minor error handling, logging and linter improvements
+
 # v0.1.9
 
 * webhooks: correctly handle test webhook messages
