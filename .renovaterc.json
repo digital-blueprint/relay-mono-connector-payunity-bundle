@@ -10,30 +10,15 @@
   "lockFileMaintenance": {
     "enabled": true
   },
+  "constraintsFiltering": "strict",
   "packageRules": [
     {
       "matchPackagePrefixes": ["symfony/"],
       "allowedVersions": "<6"
     },
     {
-      "matchPackageNames": ["api-platform/core"],
-      "allowedVersions": "<3"
-    },
-    {
-      "matchPackageNames": ["friendsofphp/php-cs-fixer"],
-      "allowedVersions": "<3.5"
-    },
-    {
-      "matchPackageNames": ["league/uri"],
-      "allowedVersions": "<6.6"
-    },
-    {
-      "matchPackageNames": ["vimeo/psalm"],
-      "allowedVersions": "<5"
-    },
-    {
-      "matchPackageNames": ["phpunit/phpunit"],
-      "allowedVersions": "<10"
+      "matchPackagePrefixes": ["symfony/orm-pack"],
+      "allowedVersions": "<2.4"
     }
   ]
 }
