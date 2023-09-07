@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\MonoConnectorPayunityBundle\Controller;
 
+use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Locale\Locale;
+use Dbp\Relay\MonoBundle\Entity\PaymentStatus;
 use Dbp\Relay\MonoBundle\Service\PaymentService;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PaymentType;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Tools;
@@ -62,6 +64,11 @@ class Widget extends AbstractController
         $this->locale->setCurrentRequestLocaleFromQuery('lang');
 
         $payment = $this->paymentService->getPaymentPersistenceByIdentifier($identifier);
+
+        $status = $payment->getPaymentStatus();
+        if ($status !== PaymentStatus::STARTED) {
+            throw new ApiError(Response::HTTP_BAD_REQUEST, "Can't continue a payment with status: ".$status);
+        }
 
         $contract = $payment->getPaymentContract();
         $method = $payment->getPaymentMethod();
