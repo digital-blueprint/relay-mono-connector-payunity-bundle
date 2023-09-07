@@ -1,3 +1,7 @@
+# v0.1.13
+
+* Log more things to the audit log when talking to payunity or when updating the payment status
+
 # v0.1.12
 
 * Update to api-platform 2.7
