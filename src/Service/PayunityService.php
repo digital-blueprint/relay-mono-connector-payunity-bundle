@@ -228,6 +228,8 @@ class PayunityService implements LoggerAwareInterface
         $lock = $this->createPaymentLock($payment);
         $lock->acquire(true);
 
+        $this->auditLogger->debug('payunity: Checking if payment is completed', $this->getLoggingContext($payment));
+
         try {
             $contract = $payment->getPaymentContract();
             $paymentDataPersisted = $this->paymentDataService->getByPaymentIdentifier($payment->getIdentifier());
@@ -236,8 +238,11 @@ class PayunityService implements LoggerAwareInterface
             }
 
             if ($payment->getPaymentStatus() === PaymentStatus::COMPLETED) {
+                $this->auditLogger->debug('payunity: payment already completed, nothing to do', $this->getLoggingContext($payment));
             } else {
-                $paymentData = $this->getCheckoutPaymentData($payment, $contract, $paymentDataPersisted->getPspIdentifier());
+                $pspIdentifier = $paymentDataPersisted->getPspIdentifier();
+                $this->auditLogger->debug('payunity: Found existing checkout: '.$pspIdentifier, $this->getLoggingContext($payment));
+                $paymentData = $this->getCheckoutPaymentData($payment, $contract, $pspIdentifier);
 
                 // https://payunity.docs.oppwa.com/reference/resultCodes
                 $result = $paymentData->getResult();
