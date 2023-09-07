@@ -47,7 +47,7 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
 
     public function complete(PaymentPersistence $paymentPersistence, string $pspData): CompleteResponseInterface
     {
-        $this->payunity->checkComplete($paymentPersistence);
+        $this->payunity->updatePaymentStatus($paymentPersistence);
 
         return new CompleteResponse($paymentPersistence->getReturnUrl());
     }

@@ -223,7 +223,7 @@ class PayunityService implements LoggerAwareInterface
         return $uri;
     }
 
-    public function checkComplete(PaymentPersistence $payment): void
+    public function updatePaymentStatus(PaymentPersistence $payment): void
     {
         $lock = $this->createPaymentLock($payment);
         $lock->acquire(true);
