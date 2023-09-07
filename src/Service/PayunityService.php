@@ -142,7 +142,7 @@ class PayunityService implements LoggerAwareInterface
         }
     }
 
-    private function getLoggingContext(PaymentPersistence $payment): array
+    public function getLoggingContext(PaymentPersistence $payment): array
     {
         return ['relay-mono-payment-id' => $payment->getIdentifier()];
     }

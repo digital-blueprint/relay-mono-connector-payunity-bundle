@@ -12,6 +12,8 @@ use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PaymentType;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Tools;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityService;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\Utils;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -40,6 +42,11 @@ class Widget extends AbstractController
      */
     private $locale;
 
+    /**
+     * @var LoggerInterface
+     */
+    private $auditLogger;
+
     public function __construct(
         PaymentService $paymentService,
         PayunityService $payunityService,
@@ -48,6 +55,12 @@ class Widget extends AbstractController
         $this->paymentService = $paymentService;
         $this->payunityService = $payunityService;
         $this->locale = $locale;
+        $this->auditLogger = new NullLogger();
+    }
+
+    public function setAuditLogger(LoggerInterface $auditLogger): void
+    {
+        $this->auditLogger = $auditLogger;
     }
 
     /**
@@ -67,6 +80,7 @@ class Widget extends AbstractController
 
         $status = $payment->getPaymentStatus();
         if ($status !== PaymentStatus::STARTED) {
+            $this->auditLogger->debug('payunity: payment not in "started" but in '.$status.', not creating a checkout!', $this->payunityService->getLoggingContext($payment));
             throw new ApiError(Response::HTTP_BAD_REQUEST, "Can't continue a payment with status: ".$status);
         }
 
