@@ -1,3 +1,8 @@
+# v0.1.14
+
+* Don't allow creating a new payunity checkout once we get notified that a previous checkout
+  has advanced already.
+
 # v0.1.13
 
 * Log more things to the audit log when talking to payunity or when updating the payment status
