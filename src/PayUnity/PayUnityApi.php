@@ -125,7 +125,7 @@ class PayUnityApi implements LoggerAwareInterface
         $client = $this->connection->getClient();
         $entityId = $connection->getEntityId();
 
-        $this->auditLogger->debug('payunity: get payment status', $this->withLoggingContext());
+        $this->auditLogger->debug('payunity: get payment status', $this->withLoggingContext(['checkoutId' => $checkoutId]));
 
         $uriTemplate = new UriTemplate('v1/checkouts/{checkoutId}/payment{?entityId}');
         $uri = (string) $uriTemplate->expand([
@@ -156,7 +156,7 @@ class PayUnityApi implements LoggerAwareInterface
         $client = $this->connection->getClient();
         $entityId = $connection->getEntityId();
 
-        $this->auditLogger->debug('payunity: query payment', $this->withLoggingContext());
+        $this->auditLogger->debug('payunity: query payment', $this->withLoggingContext(['paymentId' => $paymentId]));
 
         $uriTemplate = new UriTemplate('v1/query/{paymentId}{?entityId}');
         $uri = (string) $uriTemplate->expand([
@@ -189,7 +189,7 @@ class PayUnityApi implements LoggerAwareInterface
         $client = $this->connection->getClient();
         $entityId = $connection->getEntityId();
 
-        $this->auditLogger->debug('payunity: query merchant', $this->withLoggingContext());
+        $this->auditLogger->debug('payunity: query merchant', $this->withLoggingContext(['merchantTransactionId' => $merchantTransactionId]));
 
         $uriTemplate = new UriTemplate('v1/query{?entityId,merchantTransactionId}');
         $uri = (string) $uriTemplate->expand([
