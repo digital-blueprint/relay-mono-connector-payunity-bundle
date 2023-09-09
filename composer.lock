@@ -333,16 +333,16 @@
         },
         {
             "name": "dbp/relay-mono-bundle",
-            "version": "v0.3.5",
+            "version": "v0.3.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/digital-blueprint/relay-mono-bundle.git",
-                "reference": "f5567154729867f8b8e8116645374a0b856e9d23"
+                "reference": "93a0799f5c161d0d1d498439d17c1399f80add80"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/digital-blueprint/relay-mono-bundle/zipball/f5567154729867f8b8e8116645374a0b856e9d23",
-                "reference": "f5567154729867f8b8e8116645374a0b856e9d23",
+                "url": "https://api.github.com/repos/digital-blueprint/relay-mono-bundle/zipball/93a0799f5c161d0d1d498439d17c1399f80add80",
+                "reference": "93a0799f5c161d0d1d498439d17c1399f80add80",
                 "shasum": ""
             },
             "require": {
@@ -389,9 +389,9 @@
             "description": "A payment bundle for the Relay API gateway",
             "support": {
                 "issues": "https://github.com/digital-blueprint/relay-mono-bundle/issues",
-                "source": "https://github.com/digital-blueprint/relay-mono-bundle/tree/v0.3.5"
+                "source": "https://github.com/digital-blueprint/relay-mono-bundle/tree/v0.3.6"
             },
-            "time": "2023-05-15T10:44:34+00:00"
+            "time": "2023-09-07T09:25:40+00:00"
         },
         {
             "name": "doctrine/annotations",
