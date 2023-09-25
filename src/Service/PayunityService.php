@@ -12,7 +12,9 @@ use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\ApiException;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Checkout;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Connection;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PaymentData;
+use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PaymentType;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PayUnityApi;
+use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Tools;
 use League\Uri\UriTemplate;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -204,6 +206,30 @@ class PayunityService implements LoggerAwareInterface
         }
 
         return $checkout;
+    }
+
+    public function startPayment(PaymentPersistence $payment): void
+    {
+        $contract = $payment->getPaymentContract();
+        $contractConfig = $this->config['payment_contracts'][$contract];
+
+        $contract = $payment->getPaymentContract();
+        $amount = Tools::floatToAmount((float) $payment->getAmount());
+        $currency = $payment->getCurrency();
+        $paymentType = PaymentType::DEBIT;
+        $extra = [];
+        $testMode = $contractConfig['test_mode'];
+        if ($testMode === 'internal') {
+            $extra['testMode'] = 'INTERNAL';
+        } elseif ($testMode === 'external') {
+            $extra['testMode'] = 'EXTERNAL';
+        }
+
+        // This allows us to (manually) connect our payment entry with the transaction in the payunity web interface
+        // even if the payment gets canceled or never finished.
+        $extra['merchantTransactionId'] = $payment->getIdentifier();
+
+        $this->prepareCheckout($payment, $contract, $amount, $currency, $paymentType, $extra);
     }
 
     public function getWidgetUrl(PaymentPersistence $payment): string
