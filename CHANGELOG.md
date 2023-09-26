@@ -1,3 +1,7 @@
+# v0.1.15
+
+* Avoid creating a new payunity checkout in case the user reloads the payunity widget page.
+
 # v0.1.14
 
 * Don't allow creating a new payunity checkout once we get notified that a previous checkout
