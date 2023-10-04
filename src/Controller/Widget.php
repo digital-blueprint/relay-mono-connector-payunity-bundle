@@ -7,7 +7,7 @@ namespace Dbp\Relay\MonoConnectorPayunityBundle\Controller;
 use Dbp\Relay\CoreBundle\Locale\Locale;
 use Dbp\Relay\MonoBundle\Service\PaymentService;
 use Dbp\Relay\MonoConnectorPayunityBundle\Config\ConfigurationService;
-use Dbp\Relay\MonoConnectorPayunityBundle\Service\PaymentDataService;
+use Dbp\Relay\MonoConnectorPayunityBundle\Persistence\PaymentDataService;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityService;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\Utils;
 use Psr\Log\LoggerInterface;

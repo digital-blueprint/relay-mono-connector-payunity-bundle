@@ -7,7 +7,7 @@ namespace Dbp\Relay\MonoConnectorPayunityBundle\Webhook;
 use Dbp\Relay\MonoBundle\Service\PaymentService;
 use Dbp\Relay\MonoConnectorPayunityBundle\Config\ConfigurationService;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\WebhookRequest;
-use Dbp\Relay\MonoConnectorPayunityBundle\Service\PaymentDataService;
+use Dbp\Relay\MonoConnectorPayunityBundle\Persistence\PaymentDataService;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;

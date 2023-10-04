@@ -8,6 +8,7 @@ use Dbp\Relay\CoreBundle\HealthCheck\CheckInterface;
 use Dbp\Relay\CoreBundle\HealthCheck\CheckOptions;
 use Dbp\Relay\CoreBundle\HealthCheck\CheckResult;
 use Dbp\Relay\MonoConnectorPayunityBundle\Config\ConfigurationService;
+use Dbp\Relay\MonoConnectorPayunityBundle\Persistence\PaymentDataService;
 
 class HealthCheck implements CheckInterface
 {

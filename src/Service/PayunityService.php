@@ -17,6 +17,7 @@ use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PaymentData;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PaymentType;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PayUnityApi;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Tools;
+use Dbp\Relay\MonoConnectorPayunityBundle\Persistence\PaymentDataService;
 use League\Uri\UriTemplate;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;

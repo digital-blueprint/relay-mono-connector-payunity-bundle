@@ -13,7 +13,7 @@ services:
     autowire: true
     autoconfigure: true
 
-  Dbp\Relay\MonoConnectorPayunityBundle\Service\PaymentDataService:
+  Dbp\Relay\MonoConnectorPayunityBundle\Persistence\PaymentDataService:
     autowire: true
     autoconfigure: true
     arguments:
