@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Dbp\Relay\MonoConnectorPayunityBundle\Service;
 
 use Dbp\Relay\MonoBundle\Persistence\PaymentPersistence;
-use Dbp\Relay\MonoConnectorPayunityBundle\Entity\PaymentDataPersistence;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Checkout;
+use Dbp\Relay\MonoConnectorPayunityBundle\Persistence\PaymentDataPersistence;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;

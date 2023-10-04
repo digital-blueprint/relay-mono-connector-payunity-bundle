@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\MonoConnectorPayunityBundle\Entity;
+namespace Dbp\Relay\MonoConnectorPayunityBundle\Persistence;
 
 use Dbp\Relay\MonoBundle\Persistence\PaymentPersistence;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Checkout;

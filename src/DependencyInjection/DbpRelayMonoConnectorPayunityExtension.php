@@ -57,8 +57,8 @@ class DbpRelayMonoConnectorPayunityExtension extends ConfigurableExtension imple
                         'mappings' => [
                             'dbp_relay_mono_connector_payunity' => [
                                 'type' => 'annotation',
-                                'dir' => __DIR__.'/../Entity',
-                                'prefix' => 'Dbp\Relay\MonoConnectorPayunityBundle\Entity',
+                                'dir' => __DIR__.'/../Persistence',
+                                'prefix' => 'Dbp\Relay\MonoConnectorPayunityBundle\Persistence',
                             ],
                         ],
                     ],
