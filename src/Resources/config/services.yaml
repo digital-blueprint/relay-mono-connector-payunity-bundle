@@ -1,5 +1,5 @@
 services:
-  Dbp\Relay\MonoConnectorPayunityBundle\Controller\Webhook:
+  Dbp\Relay\MonoConnectorPayunityBundle\Webhook\Webhook:
     autowire: true
     autoconfigure: true
 
@@ -24,7 +24,7 @@ services:
     autoconfigure: true
     public: true
 
-  Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityWebhookService:
+  Dbp\Relay\MonoConnectorPayunityBundle\Webhook\PayunityWebhookService:
     autowire: true
     autoconfigure: true
     calls:
@@ -34,7 +34,7 @@ services:
     autowire: true
     autoconfigure: true
 
-  Dbp\Relay\MonoConnectorPayunityBundle\Command\WebhookCommand:
+  Dbp\Relay\MonoConnectorPayunityBundle\Webhook\WebhookCommand:
     autowire: true
     autoconfigure: true
 

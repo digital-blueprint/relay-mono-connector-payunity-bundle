@@ -6,7 +6,7 @@ namespace Dbp\Relay\MonoConnectorPayunityBundle\Tests;
 
 use Dbp\Relay\MonoConnectorPayunityBundle\Config\PaymentContract;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\WebhookRequest;
-use Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityWebhookService;
+use Dbp\Relay\MonoConnectorPayunityBundle\Webhook\PayunityWebhookService;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;

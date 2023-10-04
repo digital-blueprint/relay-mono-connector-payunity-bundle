@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\MonoConnectorPayunityBundle\Service;
+namespace Dbp\Relay\MonoConnectorPayunityBundle\Webhook;
 
 use Dbp\Relay\MonoConnectorPayunityBundle\Config\PaymentContract;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\WebhookRequest;

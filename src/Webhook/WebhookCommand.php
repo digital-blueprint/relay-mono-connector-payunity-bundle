@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\MonoConnectorPayunityBundle\Command;
+namespace Dbp\Relay\MonoConnectorPayunityBundle\Webhook;
 
 use Dbp\Relay\MonoConnectorPayunityBundle\Config\ConfigurationService;
-use Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityWebhookService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;

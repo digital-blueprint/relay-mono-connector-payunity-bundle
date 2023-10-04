@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\MonoConnectorPayunityBundle\Controller;
+namespace Dbp\Relay\MonoConnectorPayunityBundle\Webhook;
 
 use Dbp\Relay\MonoBundle\Service\PaymentService;
 use Dbp\Relay\MonoConnectorPayunityBundle\Config\ConfigurationService;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\WebhookRequest;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\PaymentDataService;
-use Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityWebhookService;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
