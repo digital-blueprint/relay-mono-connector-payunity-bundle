@@ -8,6 +8,8 @@ use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Locale\Locale;
 use Dbp\Relay\MonoBundle\Persistence\PaymentPersistence;
 use Dbp\Relay\MonoBundle\Persistence\PaymentStatus;
+use Dbp\Relay\MonoConnectorPayunityBundle\Config\ConfigurationService;
+use Dbp\Relay\MonoConnectorPayunityBundle\Config\PaymentContract;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\ApiException;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Checkout;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Connection;
@@ -29,11 +31,6 @@ use Symfony\Component\Uid\Uuid;
 class PayunityService implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
-
-    /**
-     * @var array
-     */
-    private $config = [];
 
     /**
      * @var Connection[]
@@ -64,12 +61,17 @@ class PayunityService implements LoggerAwareInterface
      * @var LoggerInterface
      */
     private $auditLogger;
+    /**
+     * @var ConfigurationService
+     */
+    private $configService;
 
     public function __construct(
         PaymentDataService $paymentDataService,
         UrlHelper $urlHelper,
         Locale $locale,
-        LockFactory $lockFactory
+        LockFactory $lockFactory,
+        ConfigurationService $configService
     ) {
         $this->paymentDataService = $paymentDataService;
         $this->urlHelper = $urlHelper;
@@ -77,16 +79,12 @@ class PayunityService implements LoggerAwareInterface
         $this->lockFactory = $lockFactory;
         $this->logger = new NullLogger();
         $this->auditLogger = new NullLogger();
+        $this->configService = $configService;
     }
 
     public function setAuditLogger(LoggerInterface $auditLogger): void
     {
         $this->auditLogger = $auditLogger;
-    }
-
-    public function setConfig(array $config): void
-    {
-        $this->config = $config;
     }
 
     private function createPaymentLock(PaymentPersistence $payment): LockInterface
@@ -100,11 +98,11 @@ class PayunityService implements LoggerAwareInterface
     }
 
     /**
-     * @return string[]
+     * @return PaymentContract[]
      */
     public function getContracts(): array
     {
-        return array_keys($this->config['payment_contracts']);
+        return $this->configService->getPaymentContracts();
     }
 
     public function getPaymentIdForPspData(string $pspData): ?string
@@ -149,26 +147,18 @@ class PayunityService implements LoggerAwareInterface
         return ['relay-mono-payment-id' => $payment->getIdentifier()];
     }
 
-    public function getApiByContract(string $contract, ?PaymentPersistence $payment): PayUnityApi
+    public function getApiByContract(string $contractId, ?PaymentPersistence $payment): PayUnityApi
     {
-        if (!array_key_exists($contract, $this->connection)) {
-            if (!array_key_exists($contract, $this->config['payment_contracts'])) {
-                throw new \RuntimeException("Contract $contract doesn't exist");
-            }
-            $config = $this->config['payment_contracts'][$contract];
-
-            $apiUrl = $config['api_url'];
-            $entityId = $config['entity_id'];
-            $accessToken = $config['access_token'];
-
-            $this->connection[$contract] = new Connection(
-                $apiUrl,
-                $entityId,
-                $accessToken
+        if (!array_key_exists($contractId, $this->connection)) {
+            $contract = $this->getPaymentContractByIdentifier($contractId);
+            $this->connection[$contractId] = new Connection(
+                $contract->getApiUrl(),
+                $contract->getEntityId(),
+                $contract->getAccessToken()
             );
         }
 
-        $connection = $this->connection[$contract];
+        $connection = $this->connection[$contractId];
         $connection->setLogger($this->logger);
         $api = new PayUnityApi($connection);
         $api->setLogger($this->logger);
@@ -208,20 +198,28 @@ class PayunityService implements LoggerAwareInterface
         return $checkout;
     }
 
+    private function getPaymentContractByIdentifier(string $contractId): PaymentContract
+    {
+        $contract = $this->configService->getPaymentContractByIdentifier($contractId);
+        if ($contract === null) {
+            throw new \RuntimeException("Contract $contractId doesn't exist");
+        }
+
+        return $contract;
+    }
+
     public function startPayment(PaymentPersistence $payment): void
     {
-        $contract = $payment->getPaymentContract();
-        $contractConfig = $this->config['payment_contracts'][$contract];
-
-        $contract = $payment->getPaymentContract();
+        $contractId = $payment->getPaymentContract();
+        $contract = $this->getPaymentContractByIdentifier($contractId);
         $amount = Tools::floatToAmount((float) $payment->getAmount());
         $currency = $payment->getCurrency();
         $paymentType = PaymentType::DEBIT;
         $extra = [];
-        $testMode = $contractConfig['test_mode'];
-        if ($testMode === 'internal') {
+        $testMode = $contract->getTestMode();
+        if ($testMode === PaymentContract::TEST_MODE_INTERNAL) {
             $extra['testMode'] = 'INTERNAL';
-        } elseif ($testMode === 'external') {
+        } elseif ($testMode === PaymentContract::TEST_MODE_EXTERNAL) {
             $extra['testMode'] = 'EXTERNAL';
         }
 
@@ -229,17 +227,18 @@ class PayunityService implements LoggerAwareInterface
         // even if the payment gets canceled or never finished.
         $extra['merchantTransactionId'] = $payment->getIdentifier();
 
-        $this->prepareCheckout($payment, $contract, $amount, $currency, $paymentType, $extra);
+        $this->prepareCheckout($payment, $contractId, $amount, $currency, $paymentType, $extra);
     }
 
     public function getWidgetUrl(PaymentPersistence $payment): string
     {
-        $contract = $payment->getPaymentContract();
+        $contractId = $payment->getPaymentContract();
         $method = $payment->getPaymentMethod();
-        $contractConfig = $this->config['payment_contracts'][$contract];
-        $config = $contractConfig['payment_methods_to_widgets'][$method];
 
-        $uriTemplate = new UriTemplate($config['widget_url']);
+        $contract = $this->getPaymentContractByIdentifier($contractId);
+        $widgetConfig = $contract->getPaymentMethodsToWidgets()[$method];
+
+        $uriTemplate = new UriTemplate($widgetConfig['widget_url']);
         $uri = (string) $uriTemplate->expand([
             'identifier' => $payment->getIdentifier(),
             'lang' => $this->locale->getCurrentPrimaryLanguage(),

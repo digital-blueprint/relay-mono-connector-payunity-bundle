@@ -6,7 +6,6 @@ namespace Dbp\Relay\MonoConnectorPayunityBundle\DependencyInjection;
 
 use Dbp\Relay\CoreBundle\Extension\ExtensionTrait;
 use Dbp\Relay\MonoConnectorPayunityBundle\Config\ConfigurationService;
-use Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityService;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
@@ -28,9 +27,6 @@ class DbpRelayMonoConnectorPayunityExtension extends ConfigurableExtension imple
         $this->addRouteResource($container, __DIR__.'/../Resources/config/routing.yaml', 'yaml');
 
         $definition = $container->getDefinition(ConfigurationService::class);
-        $definition->addMethodCall('setConfig', [$mergedConfig]);
-
-        $definition = $container->getDefinition(PayunityService::class);
         $definition->addMethodCall('setConfig', [$mergedConfig]);
     }
 
