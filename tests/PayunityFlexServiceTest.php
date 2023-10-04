@@ -20,4 +20,9 @@ class PayunityFlexServiceTest extends KernelTestCase
         $this->assertTrue($service instanceof PayunityFlexService);
         $this->assertTrue($service instanceof PaymentServiceProviderServiceInterface);
     }
+
+    public function testKernel()
+    {
+        $this->assertNotNull(self::bootKernel());
+    }
 }

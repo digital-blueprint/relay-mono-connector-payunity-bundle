@@ -20,9 +20,6 @@ class DbpRelayMonoConnectorPayunityExtension extends ConfigurableExtension imple
 
     public function loadInternal(array $mergedConfig, ContainerBuilder $container)
     {
-        $this->addResourceClassDirectory($container, __DIR__.'/../Entity');
-        $this->addPathToHide($container, '/mono-connector-payunity/widget/index');
-
         $loader = new YamlFileLoader(
             $container,
             new FileLocator(__DIR__.'/../Resources/config')
