@@ -9,7 +9,7 @@ services:
     calls:
       - setAuditLogger: [ '@monolog.logger.dbp_relay_mono_audit' ]
 
-  Dbp\Relay\MonoConnectorPayunityBundle\Service\ConfigurationService:
+  Dbp\Relay\MonoConnectorPayunityBundle\Config\ConfigurationService:
     autowire: true
     autoconfigure: true
 

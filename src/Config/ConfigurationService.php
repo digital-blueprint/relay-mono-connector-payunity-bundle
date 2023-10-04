@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Dbp\Relay\MonoConnectorPayunityBundle\Service;
-
-use Dbp\Relay\MonoConnectorPayunityBundle\Entity\PaymentContract;
+namespace Dbp\Relay\MonoConnectorPayunityBundle\Config;
 
 class ConfigurationService
 {

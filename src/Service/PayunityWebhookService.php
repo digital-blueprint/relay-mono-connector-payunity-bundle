@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\MonoConnectorPayunityBundle\Service;
 
-use Dbp\Relay\MonoConnectorPayunityBundle\Entity\PaymentContract;
+use Dbp\Relay\MonoConnectorPayunityBundle\Config\PaymentContract;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\WebhookRequest;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;

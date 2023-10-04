@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\MonoConnectorPayunityBundle\Command;
 
-use Dbp\Relay\MonoConnectorPayunityBundle\Service\ConfigurationService;
+use Dbp\Relay\MonoConnectorPayunityBundle\Config\ConfigurationService;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityWebhookService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
