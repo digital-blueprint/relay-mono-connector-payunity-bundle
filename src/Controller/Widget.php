@@ -6,6 +6,7 @@ namespace Dbp\Relay\MonoConnectorPayunityBundle\Controller;
 
 use Dbp\Relay\CoreBundle\Locale\Locale;
 use Dbp\Relay\MonoBundle\Service\PaymentService;
+use Dbp\Relay\MonoConnectorPayunityBundle\Config\ConfigurationService;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\PaymentDataService;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityService;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\Utils;
@@ -19,11 +20,6 @@ use Twig\Loader\FilesystemLoader;
 
 class Widget extends AbstractController
 {
-    /**
-     * @var array
-     */
-    private $config = [];
-
     /**
      * @var PaymentService
      */
@@ -47,11 +43,16 @@ class Widget extends AbstractController
      * @var PaymentDataService
      */
     private $paymentDataService;
+    /**
+     * @var ConfigurationService
+     */
+    private $configService;
 
     public function __construct(
         PaymentService $paymentService,
         PayunityService $payunityService,
         PaymentDataService $paymentDataService,
+        ConfigurationService $configService,
         Locale $locale
     ) {
         $this->paymentService = $paymentService;
@@ -59,19 +60,12 @@ class Widget extends AbstractController
         $this->paymentDataService = $paymentDataService;
         $this->locale = $locale;
         $this->auditLogger = new NullLogger();
+        $this->configService = $configService;
     }
 
     public function setAuditLogger(LoggerInterface $auditLogger): void
     {
         $this->auditLogger = $auditLogger;
-    }
-
-    /**
-     * @return void
-     */
-    public function setConfig(array $config)
-    {
-        $this->config = $config;
     }
 
     public function index(Request $request): Response
@@ -83,10 +77,11 @@ class Widget extends AbstractController
         $this->auditLogger->debug('payunity: loading widget page', $this->payunityService->getLoggingContext($payment));
 
         $paymentData = $this->paymentDataService->getByPaymentIdentifier($identifier);
-        $contract = $payment->getPaymentContract();
+        $contractId = $payment->getPaymentContract();
         $method = $payment->getPaymentMethod();
-        $contractConfig = $this->config['payment_contracts'][$contract];
-        $config = $contractConfig['payment_methods_to_widgets'][$method];
+
+        $contract = $this->configService->getPaymentContractByIdentifier($contractId);
+        $config = $contract->getPaymentMethodsToWidgets()[$method];
 
         // payunity supports a list of locales, which more or less match the primary language format,
         // so just use that instead fo hardcoding the list:
@@ -96,7 +91,7 @@ class Widget extends AbstractController
         $shopperResultUrl = Utils::extendReturnUrl($payment->getPspReturnUrl());
         $brands = $config['brands'];
         $checkoutId = $paymentData->getPspIdentifier();
-        $scriptSrc = $this->payunityService->getPaymentScriptSrc($payment, $contract, $checkoutId);
+        $scriptSrc = $this->payunityService->getPaymentScriptSrc($payment, $contractId, $checkoutId);
         $context = [
             'shopperResultUrl' => $shopperResultUrl,
             'brands' => $brands,
