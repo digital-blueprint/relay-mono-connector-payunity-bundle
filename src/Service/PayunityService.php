@@ -128,7 +128,7 @@ class PayunityService implements LoggerAwareInterface
         return $paymentDataPersistence->getPaymentIdentifier();
     }
 
-    public function checkConnection($contract): void
+    public function checkConnection(string $contract): void
     {
         $api = $this->getApiByContract($contract, null);
         try {

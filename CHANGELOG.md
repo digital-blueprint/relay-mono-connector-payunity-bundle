@@ -1,3 +1,7 @@
+# v0.1.17
+
+* Fix health checks broken by v0.1.16
+
 # v0.1.16
 
 * Compatibility with mono-bundle v0.4
