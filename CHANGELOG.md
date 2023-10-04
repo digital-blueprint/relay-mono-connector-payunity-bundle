@@ -1,3 +1,7 @@
+# v0.1.16
+
+* Compatibility with mono-bundle v0.4
+
 # v0.1.15
 
 * Avoid creating a new payunity checkout in case the user reloads the payunity widget page.
