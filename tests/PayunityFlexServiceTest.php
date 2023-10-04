@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\MonoConnectorPayunityBundle\Tests;
 
-use Dbp\Relay\MonoBundle\Service\PaymentServiceProviderServiceInterface;
+use Dbp\Relay\MonoBundle\PaymentServiceProvider\PaymentServiceProviderServiceInterface;
 use Dbp\Relay\MonoConnectorPayunityBundle\Service\PayunityFlexService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 

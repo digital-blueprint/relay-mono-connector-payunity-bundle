@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\MonoConnectorPayunityBundle\Service;
 
-use Dbp\Relay\MonoBundle\Entity\PaymentPersistence;
 use Dbp\Relay\MonoBundle\PaymentServiceProvider\CompleteResponse;
 use Dbp\Relay\MonoBundle\PaymentServiceProvider\CompleteResponseInterface;
+use Dbp\Relay\MonoBundle\PaymentServiceProvider\PaymentServiceProviderServiceInterface;
 use Dbp\Relay\MonoBundle\PaymentServiceProvider\StartResponse;
 use Dbp\Relay\MonoBundle\PaymentServiceProvider\StartResponseInterface;
-use Dbp\Relay\MonoBundle\Service\PaymentServiceProviderServiceInterface;
+use Dbp\Relay\MonoBundle\Persistence\PaymentPersistence;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 
@@ -46,7 +46,7 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
         return $this->payunity->getPaymentIdForPspData($pspData);
     }
 
-    public function complete(PaymentPersistence $paymentPersistence, string $pspData): CompleteResponseInterface
+    public function complete(PaymentPersistence $paymentPersistence): CompleteResponseInterface
     {
         $this->payunity->updatePaymentStatus($paymentPersistence);
 

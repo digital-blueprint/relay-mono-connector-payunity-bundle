@@ -6,8 +6,8 @@ namespace Dbp\Relay\MonoConnectorPayunityBundle\Service;
 
 use Dbp\Relay\CoreBundle\Exception\ApiError;
 use Dbp\Relay\CoreBundle\Locale\Locale;
-use Dbp\Relay\MonoBundle\Entity\PaymentPersistence;
-use Dbp\Relay\MonoBundle\Entity\PaymentStatus;
+use Dbp\Relay\MonoBundle\Persistence\PaymentPersistence;
+use Dbp\Relay\MonoBundle\Persistence\PaymentStatus;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\ApiException;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Checkout;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Connection;

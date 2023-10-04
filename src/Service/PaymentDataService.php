@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\MonoConnectorPayunityBundle\Service;
 
-use Dbp\Relay\MonoBundle\Entity\PaymentPersistence;
+use Dbp\Relay\MonoBundle\Persistence\PaymentPersistence;
 use Dbp\Relay\MonoConnectorPayunityBundle\Entity\PaymentDataPersistence;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Checkout;
 use Doctrine\ORM\EntityManagerInterface;

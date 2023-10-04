@@ -91,10 +91,8 @@ class Webhook extends AbstractController implements LoggerAwareInterface
                 $identifier = $paymentData->getPaymentIdentifier();
             }
 
-            $pspData = json_encode($pspDataArray);
             $this->paymentService->completePayAction(
-                $identifier,
-                $pspData
+                $identifier
             );
 
             return new JsonResponse();
