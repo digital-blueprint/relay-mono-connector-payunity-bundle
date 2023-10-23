@@ -180,6 +180,12 @@ class PayunityService implements LoggerAwareInterface
 
     public function prepareCheckout(PaymentPersistence $payment, string $contract, string $amount, string $currency, string $paymentType, array $extra = []): Checkout
     {
+        $existingPaymentData = $this->paymentDataService->getByPaymentIdentifier($payment->getIdentifier());
+        if ($existingPaymentData !== null) {
+            $this->auditLogger->error('payunity: Can\'t create a new checkout, there already exists one', $this->getLoggingContext($payment));
+            throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, 'Checkout can\'t be created');
+        }
+
         $api = $this->getApiByContract($contract, $payment);
 
         try {
