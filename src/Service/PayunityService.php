@@ -229,6 +229,11 @@ class PayunityService implements LoggerAwareInterface
         $extra['merchantTransactionId'] = $payment->getIdentifier();
 
         $this->prepareCheckout($payment, $contractId, $amount, $currency, $paymentType, $extra);
+
+        // We don't get a webhook response right away for the pending state, so set to pending, and then poll
+        // the real status which could be pending/failed or completed (unlikely).
+        $payment->setPaymentStatus(PaymentStatus::PENDING);
+        $this->updatePaymentStatus($payment);
     }
 
     public function getWidgetUrl(PaymentPersistence $payment): string
