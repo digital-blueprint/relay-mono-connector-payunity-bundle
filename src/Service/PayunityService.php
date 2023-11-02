@@ -16,6 +16,7 @@ use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Connection;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PaymentData;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PaymentType;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PayUnityApi;
+use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\ResultCode;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Tools;
 use Dbp\Relay\MonoConnectorPayunityBundle\Persistence\PaymentDataService;
 use League\Uri\UriTemplate;
@@ -234,11 +235,11 @@ class PayunityService implements LoggerAwareInterface
         // even if the payment gets canceled or never finished.
         $extra['merchantTransactionId'] = $payment->getIdentifier();
 
-        $this->prepareCheckout($payment, $contractId, $amount, $currency, $paymentType, $extra);
+        $checkoutData = $this->prepareCheckout($payment, $contractId, $amount, $currency, $paymentType, $extra);
+        // Set the status based on the initial response, it's usually "pending"
+        $this->setPaymentStatusForResult($payment, $checkoutData->getResult());
 
-        // We don't get a webhook response right away for the pending state, so set to pending, and then poll
-        // the real status which could be pending/failed or completed (unlikely).
-        $payment->setPaymentStatus(PaymentStatus::PENDING);
+        // We don't get a webhook response right away, so poll the payment status again, just for good measure
         $this->updatePaymentStatus($payment);
     }
 
@@ -258,6 +259,22 @@ class PayunityService implements LoggerAwareInterface
         $uri = $this->urlHelper->getAbsoluteUrl($uri);
 
         return $uri;
+    }
+
+    public function setPaymentStatusForResult(PaymentPersistence $payment, ResultCode $result): void
+    {
+        if ($result->isSuccessfullyProcessed() || $result->isSuccessfullyProcessedNeedsManualReview()) {
+            $this->auditLogger->debug('payunity: Setting payment to complete', $this->getLoggingContext($payment));
+            $payment->setPaymentStatus(PaymentStatus::COMPLETED);
+            $now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+            $payment->setCompletedAt($now);
+        } elseif ($result->isPending() || $result->isPendingExtra()) {
+            $this->auditLogger->debug('payunity: Setting payment to pending', $this->getLoggingContext($payment));
+            $payment->setPaymentStatus(PaymentStatus::PENDING);
+        } else {
+            $this->auditLogger->debug('payunity: Setting payment to failed', $this->getLoggingContext($payment));
+            $payment->setPaymentStatus(PaymentStatus::FAILED);
+        }
     }
 
     public function updatePaymentStatus(PaymentPersistence $payment): void
@@ -283,19 +300,7 @@ class PayunityService implements LoggerAwareInterface
 
                 // https://payunity.docs.oppwa.com/reference/resultCodes
                 $result = $paymentData->getResult();
-
-                if ($result->isSuccessfullyProcessed() || $result->isSuccessfullyProcessedNeedsManualReview()) {
-                    $this->auditLogger->debug('payunity: Setting payment to complete', $this->getLoggingContext($payment));
-                    $payment->setPaymentStatus(PaymentStatus::COMPLETED);
-                    $now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
-                    $payment->setCompletedAt($now);
-                } elseif ($result->isPending() || $result->isPendingExtra()) {
-                    $this->auditLogger->debug('payunity: Setting payment to pending', $this->getLoggingContext($payment));
-                    $payment->setPaymentStatus(PaymentStatus::PENDING);
-                } else {
-                    $this->auditLogger->debug('payunity: Setting payment to failed', $this->getLoggingContext($payment));
-                    $payment->setPaymentStatus(PaymentStatus::FAILED);
-                }
+                $this->setPaymentStatusForResult($payment, $result);
             }
         } finally {
             $lock->release();
