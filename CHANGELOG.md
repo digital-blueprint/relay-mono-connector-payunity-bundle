@@ -1,3 +1,8 @@
+# v0.1.18
+
+* Set/fetch the payment status right after creating a checkout instead of waiting on the first webhook
+* Don't allow creating multiple checkouts for the same payment
+
 # v0.1.17
 
 * Fix health checks broken by v0.1.16
