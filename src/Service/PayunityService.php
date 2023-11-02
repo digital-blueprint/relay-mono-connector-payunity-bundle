@@ -235,9 +235,15 @@ class PayunityService implements LoggerAwareInterface
         // even if the payment gets canceled or never finished.
         $extra['merchantTransactionId'] = $payment->getIdentifier();
 
-        $checkoutData = $this->prepareCheckout($payment, $contractId, $amount, $currency, $paymentType, $extra);
-        // Set the status based on the initial response, it's usually "pending"
-        $this->setPaymentStatusForResult($payment, $checkoutData->getResult());
+        $lock = $this->createPaymentLock($payment);
+        $lock->acquire(true);
+        try {
+            $checkoutData = $this->prepareCheckout($payment, $contractId, $amount, $currency, $paymentType, $extra);
+            // Set the status based on the initial response, it's usually "pending"
+            $this->setPaymentStatusForResult($payment, $checkoutData->getResult());
+        } finally {
+            $lock->release();
+        }
 
         // We don't get a webhook response right away, so poll the payment status again, just for good measure
         $this->updatePaymentStatus($payment);
