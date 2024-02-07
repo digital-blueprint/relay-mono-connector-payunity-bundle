@@ -1,3 +1,7 @@
+# v0.1.19
+
+* Drop support for PHP 7.3
+
 # v0.1.18
 
 * Set/fetch the payment status right after creating a checkout instead of waiting on the first webhook
