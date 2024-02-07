@@ -26,6 +26,7 @@ class Utils
     public static function isPayunityPspData(string $pspData): bool
     {
         $path = parse_url($pspData, PHP_URL_PATH);
+
         // we right-pad the extended URL with "/", so allow both
         return $path !== null && ($path === 'payunity' || $path === '/payunity');
     }

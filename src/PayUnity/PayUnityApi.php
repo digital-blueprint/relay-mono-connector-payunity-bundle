@@ -57,10 +57,10 @@ class PayUnityApi implements LoggerAwareInterface
     /**
      * Prepare a checkout. See https://www.payunity.com/reference/parameters#basic.
      *
-     * @param $amount - Indicates the amount of the payment request. The dot is used as decimal separator.
-     * @param $currency - The currency code of the payment request's amount (ISO 4217)
+     * @param $amount      - Indicates the amount of the payment request. The dot is used as decimal separator.
+     * @param $currency    - The currency code of the payment request's amount (ISO 4217)
      * @param $paymentType - See PaymentType
-     * @param $extra - extra key/value pairs passed to the API, see the docs
+     * @param $extra       - extra key/value pairs passed to the API, see the docs
      */
     public function prepareCheckout(string $amount, string $currency, string $paymentType, array $extra = []): Checkout
     {

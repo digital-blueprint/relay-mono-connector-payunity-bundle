@@ -10,7 +10,9 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
+ *
  * @ORM\Table(name="mono_connector_payunity_payments", indexes={
+ *
  *     @ORM\Index(name="payment_identifier_idx", fields={"paymentIdentifier"}),
  *     @ORM\Index(name="psp_identifier_idx", fields={"pspIdentifier"}),
  * })
@@ -19,26 +21,32 @@ class PaymentDataPersistence
 {
     /**
      * @var int
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue
+     *
      * @ORM\Column(type="integer")
      */
     private $identifier;
 
     /**
      * @var \DateTimeInterface
+     *
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $createdAt;
 
     /**
      * @var string
+     *
      * @ORM\Column(type="string")
      */
     private $paymentIdentifier;
 
     /**
      * @var string
+     *
      * @ORM\Column(type="string")
      */
     private $pspIdentifier;
