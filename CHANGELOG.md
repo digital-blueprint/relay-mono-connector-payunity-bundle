@@ -1,3 +1,9 @@
+# v0.1.21
+
+* dev: replace abandoned composer-git-hooks with captainhook.
+  Run `vendor/bin/captainhook install -f` to replace the old hooks with the new ones
+  on an existing checkout.
+
 # v0.1.20
 
 * Drop support for PHP 7.4/8.0
