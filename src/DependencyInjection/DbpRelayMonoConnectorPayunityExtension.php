@@ -16,7 +16,7 @@ class DbpRelayMonoConnectorPayunityExtension extends ConfigurableExtension imple
 {
     use ExtensionTrait;
 
-    public function loadInternal(array $mergedConfig, ContainerBuilder $container)
+    public function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
         $loader = new YamlFileLoader(
             $container,
@@ -30,7 +30,7 @@ class DbpRelayMonoConnectorPayunityExtension extends ConfigurableExtension imple
         $definition->addMethodCall('setConfig', [$mergedConfig]);
     }
 
-    public function prepend(ContainerBuilder $container)
+    public function prepend(ContainerBuilder $container): void
     {
         $configs = $container->getExtensionConfig($this->getAlias());
         $config = $this->processConfiguration(new Configuration(), $configs);

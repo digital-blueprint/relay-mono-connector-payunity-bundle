@@ -14,8 +14,6 @@ use Symfony\Component\Routing\RouterInterface;
 
 class WebhookCommand extends Command
 {
-    protected static $defaultName = 'dbp:relay-mono-connector-payunity:webhook-info';
-
     /**
      * @var ConfigurationService
      */
@@ -46,6 +44,7 @@ class WebhookCommand extends Command
      */
     protected function configure()
     {
+        $this->setName('dbp:relay-mono-connector-payunity:webhook-info');
         $this
             ->setDescription('Webhook info command')
             ->addArgument('contract-id', InputArgument::OPTIONAL, 'The contract ID');
