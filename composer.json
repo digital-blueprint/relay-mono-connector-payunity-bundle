@@ -9,7 +9,7 @@
         "ext-json": "*",
         "api-platform/core": "^2.7.11 || ^3.2",
         "dbp/relay-core-bundle": "^0.1.148",
-        "dbp/relay-mono-bundle": "^0.4.7",
+        "dbp/relay-mono-bundle": "^0.4.10",
         "league/uri": "^6.5 || ^7.4",
         "symfony/framework-bundle": "^5.4.30 || ^6.4",
         "doctrine/doctrine-migrations-bundle": "^3.3",
