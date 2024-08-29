@@ -25,7 +25,7 @@ class PaymentDataPersistence
     /**
      * @var \DateTimeInterface
      */
-    #[ORM\Column(type: 'datetime', nullable: true)]
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private $createdAt;
 
     /**

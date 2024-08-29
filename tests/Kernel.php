@@ -55,7 +55,7 @@ class Kernel extends BaseKernel
         ]);
 
         $container->extension('dbp_relay_mono', [
-            'database_url' => 'mysql://dummy:dummy@dummy?serverVersion=mariadb-10.3.30',
+            'database_url' => 'sqlite:///:memory:',
             'cleanup' => [
                 [
                     'payment_status' => 'ada',
@@ -79,7 +79,7 @@ class Kernel extends BaseKernel
         ]);
 
         $container->extension('dbp_relay_mono_connector_payunity', [
-            'database_url' => 'mysql://dummy:dummy@dummy?serverVersion=mariadb-10.3.30',
+            'database_url' => 'sqlite:///:memory:',
             'payment_contracts' => [
                 'payunity_flex' => [
                     'payment_methods_to_widgets' => [

@@ -28,7 +28,7 @@ class PaymentDataService implements LoggerAwareInterface
 
     public function checkConnection(): void
     {
-        $this->em->getConnection()->getWrappedConnection();
+        $this->em->getConnection()->getNativeConnection();
     }
 
     public function createPaymentData(PaymentPersistence $payment, Checkout $checkout): void
