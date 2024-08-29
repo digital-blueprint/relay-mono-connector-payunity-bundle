@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.25
+
+* Add support for doctrine/dbal v4
+* Add support for doctrine/orm v3.2
+
 ## v0.1.24
 
 * Port from doctrine annotations to PHP 8 attributes
