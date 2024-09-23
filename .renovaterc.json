@@ -10,5 +10,11 @@
   "lockFileMaintenance": {
     "enabled": true
   },
-  "constraintsFiltering": "strict"
+  "constraintsFiltering": "strict",
+  "packageRules": [
+    {
+      "matchPackageNames": ["api-platform/core"],
+      "allowedVersions": "<4"
+    }
+  ]
 }
