@@ -66,10 +66,10 @@ dbp_relay_mono_connector_payunity:
 
 ## Web Hook
 
-You can use the `dbp:relay-mono-connector-payunity:webhook-info` to see the URL you need to forward to PayUnity the webhook registration:
+You can use the `dbp:relay:mono-connector-payunity:webhook-info` to see the URL you need to forward to PayUnity the webhook registration:
 
 ```console
-./bin/console dbp:relay-mono-connector-payunity:webhook-info payunity_flex_studienservice
+./bin/console dbp:relay:mono-connector-payunity:webhook-info payunity_flex_studienservice
 Webhook URL for PayUnity:
 
 http://localhost:8000/mono-connector-payunity/webhook/payunity_flex_studienservice
