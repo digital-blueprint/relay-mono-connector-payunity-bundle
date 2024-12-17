@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.1.26
+
+* Port to phpstan v2
+* Test with PHP 8.4
+* Drop support for api-platform v2
+* Drop support for Symfony 5
+* Drop support for psalm
+* Adjust CLI command naming schema (old variant still works)
+
 ## v0.1.25
 
 * Add support for doctrine/dbal v4
