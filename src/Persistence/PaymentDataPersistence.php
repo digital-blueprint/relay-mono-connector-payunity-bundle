@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\MonoConnectorPayunityBundle\Persistence;
 
-use Dbp\Relay\MonoBundle\Persistence\PaymentPersistence;
-use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Checkout;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Table(name: 'mono_connector_payunity_payments')]
@@ -39,6 +37,18 @@ class PaymentDataPersistence
      */
     #[ORM\Column(type: 'string')]
     private $pspIdentifier;
+
+    /**
+     * @var string
+     */
+    #[ORM\Column(type: 'string', nullable: true)]
+    private $pspContract;
+
+    /**
+     * @var string
+     */
+    #[ORM\Column(type: 'string', nullable: true)]
+    private $pspMethod;
 
     public function getIdentifier(): int
     {
@@ -88,12 +98,23 @@ class PaymentDataPersistence
         return $this;
     }
 
-    public static function fromPaymentAndCheckout(PaymentPersistence $payment, Checkout $checkout): PaymentDataPersistence
+    public function getPspContract(): ?string
     {
-        $paymentDataPersistence = new PaymentDataPersistence();
-        $paymentDataPersistence->setPaymentIdentifier($payment->getIdentifier());
-        $paymentDataPersistence->setPspIdentifier($checkout->getId());
+        return $this->pspContract;
+    }
 
-        return $paymentDataPersistence;
+    public function setPspContract(string $pspContract): void
+    {
+        $this->pspContract = $pspContract;
+    }
+
+    public function getPspMethod(): ?string
+    {
+        return $this->pspMethod;
+    }
+
+    public function setPspMethod(string $pspMethod): void
+    {
+        $this->pspMethod = $pspMethod;
     }
 }

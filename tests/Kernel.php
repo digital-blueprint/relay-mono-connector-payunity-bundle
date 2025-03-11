@@ -56,23 +56,10 @@ class Kernel extends BaseKernel
 
         $container->extension('dbp_relay_mono', [
             'database_url' => 'sqlite:///:memory:',
-            'cleanup' => [
-                [
-                    'payment_status' => 'ada',
-                    'timeout_before' => '123',
-                ],
-            ],
-            'payment_session_timeout' => 1234,
             'payment_types' => [
-                [
-                    'service' => 'bla',
-                    'payment_contracts' => [
-                        [
-                            'service' => 'bla',
-                            'payment_methods' => [
-                                [],
-                            ],
-                        ],
+                'something' => [
+                    'backend_type' => 'bla',
+                    'payment_methods' => [
                     ],
                 ],
             ],

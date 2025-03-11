@@ -31,9 +31,13 @@ class PaymentDataService implements LoggerAwareInterface
         $this->em->getConnection()->getNativeConnection();
     }
 
-    public function createPaymentData(PaymentPersistence $payment, Checkout $checkout): void
+    public function createPaymentData(string $pspContract, string $pspMethod, PaymentPersistence $payment, Checkout $checkout): void
     {
-        $paymentDataPersistence = PaymentDataPersistence::fromPaymentAndCheckout($payment, $checkout);
+        $paymentDataPersistence = new PaymentDataPersistence();
+        $paymentDataPersistence->setPaymentIdentifier($payment->getIdentifier());
+        $paymentDataPersistence->setPspIdentifier($checkout->getId());
+        $paymentDataPersistence->setPspContract($pspContract);
+        $paymentDataPersistence->setPspMethod($pspMethod);
         $now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
         $paymentDataPersistence->setCreatedAt($now);
         $this->em->persist($paymentDataPersistence);

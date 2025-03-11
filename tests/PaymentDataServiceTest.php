@@ -48,7 +48,7 @@ class PaymentDataServiceTest extends KernelTestCase
         ]);
         $payment = new PaymentPersistence();
         $payment->setIdentifier('foo');
-        $this->service->createPaymentData($payment, $checkout);
+        $this->service->createPaymentData('somecontract', 'somemethod', $payment, $checkout);
 
         $paymentData = $this->service->getByPaymentIdentifier('foo');
         $this->assertSame(1, $paymentData->getIdentifier());
@@ -56,6 +56,8 @@ class PaymentDataServiceTest extends KernelTestCase
         $this->assertInstanceOf(\DateTimeImmutable::class, $paymentData->getCreatedAt());
         $this->assertSame('foo', $paymentData->getPaymentIdentifier());
         $this->assertSame('checkout-id', $paymentData->getPspIdentifier());
+        $this->assertSame('somecontract', $paymentData->getPspContract());
+        $this->assertSame('somemethod', $paymentData->getPspMethod());
 
         $paymentData = $this->service->getByCheckoutId('checkout-id');
         $this->assertSame('foo', $paymentData->getPaymentIdentifier());

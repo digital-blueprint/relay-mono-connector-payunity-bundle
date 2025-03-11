@@ -18,6 +18,7 @@ use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PaymentType;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\PayUnityApi;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\ResultCode;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Tools;
+use Dbp\Relay\MonoConnectorPayunityBundle\Persistence\PaymentDataPersistence;
 use Dbp\Relay\MonoConnectorPayunityBundle\Persistence\PaymentDataService;
 use League\Uri\UriTemplate;
 use Psr\Log\LoggerAwareInterface;
@@ -172,14 +173,14 @@ class PayunityService implements LoggerAwareInterface
         return $api;
     }
 
-    public function getPaymentScriptSrc(PaymentPersistence $payment, string $contract, string $checkoutId): string
+    public function getPaymentScriptSrc(PaymentPersistence $payment, PaymentDataPersistence $paymentData): string
     {
-        $api = $this->getApiByContract($contract, $payment);
+        $api = $this->getApiByContract($paymentData->getPspContract(), $payment);
 
-        return $api->getPaymentScriptSrc($checkoutId);
+        return $api->getPaymentScriptSrc($paymentData->getPspIdentifier());
     }
 
-    public function prepareCheckout(PaymentPersistence $payment, string $contract, string $amount, string $currency, string $paymentType, array $extra = []): Checkout
+    public function prepareCheckout(PaymentPersistence $payment, string $pspContract, string $pspMethod, string $amount, string $currency, string $paymentType, array $extra = []): Checkout
     {
         $existingPaymentData = $this->paymentDataService->getByPaymentIdentifier($payment->getIdentifier());
         if ($existingPaymentData !== null) {
@@ -187,7 +188,7 @@ class PayunityService implements LoggerAwareInterface
             throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, 'Checkout can\'t be created');
         }
 
-        $api = $this->getApiByContract($contract, $payment);
+        $api = $this->getApiByContract($pspContract, $payment);
 
         try {
             $checkout = $api->prepareCheckout($amount, $currency, $paymentType, $extra);
@@ -197,7 +198,7 @@ class PayunityService implements LoggerAwareInterface
         }
 
         try {
-            $this->paymentDataService->createPaymentData($payment, $checkout);
+            $this->paymentDataService->createPaymentData($pspContract, $pspMethod, $payment, $checkout);
         } catch (\Exception $e) {
             $this->logger->error('Payment data could not be created!', ['exception' => $e]);
             throw new ApiError(Response::HTTP_INTERNAL_SERVER_ERROR, 'Payment data could not be created!');
@@ -216,10 +217,9 @@ class PayunityService implements LoggerAwareInterface
         return $contract;
     }
 
-    public function startPayment(PaymentPersistence $payment): void
+    public function startPayment(string $pspContract, string $pspMethod, PaymentPersistence $payment): void
     {
-        $contractId = $payment->getPaymentContract();
-        $contract = $this->getPaymentContractByIdentifier($contractId);
+        $contract = $this->getPaymentContractByIdentifier($pspContract);
         $amount = Tools::floatToAmount((float) $payment->getAmount());
         $currency = $payment->getCurrency();
         $paymentType = PaymentType::DEBIT;
@@ -238,7 +238,7 @@ class PayunityService implements LoggerAwareInterface
         $lock = $this->createPaymentLock($payment);
         $lock->acquire(true);
         try {
-            $checkoutData = $this->prepareCheckout($payment, $contractId, $amount, $currency, $paymentType, $extra);
+            $checkoutData = $this->prepareCheckout($payment, $pspContract, $pspMethod, $amount, $currency, $paymentType, $extra);
             // Set the status based on the initial response, it's usually "pending"
             $this->setPaymentStatusForResult($payment, $checkoutData->getResult());
         } finally {
@@ -246,16 +246,13 @@ class PayunityService implements LoggerAwareInterface
         }
 
         // We don't get a webhook response right away, so poll the payment status again, just for good measure
-        $this->updatePaymentStatus($payment);
+        $this->updatePaymentStatus($pspContract, $payment);
     }
 
-    public function getWidgetUrl(PaymentPersistence $payment): string
+    public function getWidgetUrl(string $pspContract, string $pspMethod, PaymentPersistence $payment): string
     {
-        $contractId = $payment->getPaymentContract();
-        $method = $payment->getPaymentMethod();
-
-        $contract = $this->getPaymentContractByIdentifier($contractId);
-        $widgetConfig = $contract->getPaymentMethodsToWidgets()[$method];
+        $contract = $this->getPaymentContractByIdentifier($pspContract);
+        $widgetConfig = $contract->getPaymentMethodsToWidgets()[$pspMethod];
 
         $uriTemplate = new UriTemplate($widgetConfig['widget_url']);
         $uri = (string) $uriTemplate->expand([
@@ -283,7 +280,7 @@ class PayunityService implements LoggerAwareInterface
         }
     }
 
-    public function updatePaymentStatus(PaymentPersistence $payment): void
+    public function updatePaymentStatus(string $pspContract, PaymentPersistence $payment): void
     {
         $lock = $this->createPaymentLock($payment);
         $lock->acquire(true);
@@ -291,7 +288,6 @@ class PayunityService implements LoggerAwareInterface
         $this->auditLogger->debug('payunity: Checking if payment is completed', $this->getLoggingContext($payment));
 
         try {
-            $contract = $payment->getPaymentContract();
             $paymentDataPersisted = $this->paymentDataService->getByPaymentIdentifier($payment->getIdentifier());
             if ($paymentDataPersisted === null) {
                 throw ApiError::withDetails(Response::HTTP_NOT_FOUND, 'Payment data was not found!', 'mono:payment-data-not-found');
@@ -302,7 +298,7 @@ class PayunityService implements LoggerAwareInterface
             } else {
                 $pspIdentifier = $paymentDataPersisted->getPspIdentifier();
                 $this->auditLogger->debug('payunity: Found existing checkout: '.$pspIdentifier, $this->getLoggingContext($payment));
-                $paymentData = $this->getCheckoutPaymentData($payment, $contract, $pspIdentifier);
+                $paymentData = $this->getCheckoutPaymentData($payment, $pspContract, $pspIdentifier);
 
                 // https://payunity.docs.oppwa.com/reference/resultCodes
                 $result = $paymentData->getResult();
@@ -322,9 +318,9 @@ class PayunityService implements LoggerAwareInterface
         $this->paymentDataService->cleanupByPaymentIdentifier($payment->getIdentifier());
     }
 
-    private function getCheckoutPaymentData(PaymentPersistence $payment, string $contract, string $checkoutId): PaymentData
+    private function getCheckoutPaymentData(PaymentPersistence $payment, string $pspContract, string $checkoutId): PaymentData
     {
-        $api = $this->getApiByContract($contract, $payment);
+        $api = $this->getApiByContract($pspContract, $payment);
         try {
             return $api->getPaymentStatus($checkoutId);
         } catch (ApiException $e) {

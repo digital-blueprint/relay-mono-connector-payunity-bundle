@@ -77,8 +77,8 @@ class Widget extends AbstractController
         $this->auditLogger->debug('payunity: loading widget page', $this->payunityService->getLoggingContext($payment));
 
         $paymentData = $this->paymentDataService->getByPaymentIdentifier($identifier);
-        $contractId = $payment->getPaymentContract();
-        $method = $payment->getPaymentMethod();
+        $contractId = $paymentData->getPspContract();
+        $method = $paymentData->getPspMethod();
 
         $contract = $this->configService->getPaymentContractByIdentifier($contractId);
         $config = $contract->getPaymentMethodsToWidgets()[$method];
@@ -90,8 +90,7 @@ class Widget extends AbstractController
 
         $shopperResultUrl = Utils::extendReturnUrl($payment->getPspReturnUrl());
         $brands = $config['brands'];
-        $checkoutId = $paymentData->getPspIdentifier();
-        $scriptSrc = $this->payunityService->getPaymentScriptSrc($payment, $contractId, $checkoutId);
+        $scriptSrc = $this->payunityService->getPaymentScriptSrc($payment, $paymentData);
         $context = [
             'shopperResultUrl' => $shopperResultUrl,
             'brands' => $brands,

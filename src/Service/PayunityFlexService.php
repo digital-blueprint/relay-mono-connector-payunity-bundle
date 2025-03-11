@@ -27,10 +27,10 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
         $this->payunity = $payunity;
     }
 
-    public function start(PaymentPersistence $paymentPersistence): StartResponseInterface
+    public function start(string $pspContract, string $pspMethod, PaymentPersistence $paymentPersistence): StartResponseInterface
     {
-        $this->payunity->startPayment($paymentPersistence);
-        $widgetUrl = $this->payunity->getWidgetUrl($paymentPersistence);
+        $this->payunity->startPayment($pspContract, $pspMethod, $paymentPersistence);
+        $widgetUrl = $this->payunity->getWidgetUrl($pspContract, $pspMethod, $paymentPersistence);
         $data = null;
         $error = null;
 
@@ -46,17 +46,36 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
         return $this->payunity->getPaymentIdForPspData($pspData);
     }
 
-    public function complete(PaymentPersistence $paymentPersistence): CompleteResponseInterface
+    public function complete(string $pspContract, PaymentPersistence $paymentPersistence): CompleteResponseInterface
     {
-        $this->payunity->updatePaymentStatus($paymentPersistence);
+        $this->payunity->updatePaymentStatus($pspContract, $paymentPersistence);
 
         return new CompleteResponse($paymentPersistence->getReturnUrl());
     }
 
-    public function cleanup(PaymentPersistence $paymentPersistence): bool
+    public function cleanup(string $pspContract, PaymentPersistence $paymentPersistence): bool
     {
         $this->payunity->cleanupPaymentData($paymentPersistence);
 
         return true;
+    }
+
+    public function getPspContracts(): array
+    {
+        $ids = [];
+        foreach ($this->payunity->getContracts() as $contract) {
+            $ids[] = $contract->getIdentifier();
+        }
+
+        return $ids;
+    }
+
+    public function getPspMethods(string $pspContract): array
+    {
+        foreach ($this->payunity->getContracts() as $contract) {
+            return array_keys($contract->getPaymentMethodsToWidgets());
+        }
+
+        return [];
     }
 }
