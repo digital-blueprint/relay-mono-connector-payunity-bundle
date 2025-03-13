@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.27
+
+* Port to mono-bundle v0.5
+
 ## v0.1.26
 
 * Port to phpstan v2
