@@ -16,6 +16,9 @@ class DbpRelayMonoConnectorPayunityExtension extends ConfigurableExtension imple
 {
     use ExtensionTrait;
 
+    /**
+     * @param mixed[] $mergedConfig
+     */
     public function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
         $loader = new YamlFileLoader(

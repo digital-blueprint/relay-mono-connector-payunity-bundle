@@ -41,7 +41,7 @@ abstract class EntityManagerMigration extends AbstractMigration implements Conta
         return $res;
     }
 
-    private function skipInvalidDB()
+    private function skipInvalidDB(): void
     {
         $em = self::EM_NAME;
         $this->skipIf($this->connection !== $this->getEntityManager()->getConnection(), "Migration can't be executed on this connection, use --em={$em} to select the right one.'");

@@ -7,24 +7,16 @@ namespace Dbp\Relay\MonoConnectorPayunityBundle\Config;
 class ConfigurationService
 {
     /**
-     * @var array
+     * @var mixed[]
      */
     private $config = [];
 
     /**
-     * @return void
+     * @param mixed[] $config
      */
-    public function setConfig(array $config)
+    public function setConfig(array $config): void
     {
         $this->config = $config;
-    }
-
-    /**
-     * @return array
-     */
-    public function getConfig()
-    {
-        return $this->config;
     }
 
     public function getPaymentContractByIdentifier(string $identifier): ?PaymentContract
@@ -39,7 +31,7 @@ class ConfigurationService
         return $paymentContract;
     }
 
-    public function checkConfig()
+    public function checkConfig(): void
     {
         foreach ($this->getPaymentContracts() as $contract) {
             $secret = $contract->getWebhookSecret();

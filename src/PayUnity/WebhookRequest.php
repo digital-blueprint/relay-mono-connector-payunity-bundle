@@ -57,10 +57,13 @@ class WebhookRequest
      * If the notification type is payment or registration, the payload's content will be identical
      * to the response you received on the payment or registration.
      *
-     * @var array
+     * @var mixed[]
      */
     private $payload;
 
+    /**
+     * @param mixed[] $payload
+     */
     public function __construct(string $type, ?string $action, array $payload)
     {
         $this->type = $type;
@@ -88,11 +91,17 @@ class WebhookRequest
         return $this->action;
     }
 
+    /**
+     * @param mixed[] $payload
+     */
     public function setPayload(array $payload): void
     {
         $this->payload = $payload;
     }
 
+    /**
+     * @return mixed[]
+     */
     public function getPayload(): array
     {
         return $this->payload;

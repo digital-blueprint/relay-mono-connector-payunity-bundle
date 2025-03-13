@@ -40,7 +40,7 @@ class PaymentContract
     private $testMode;
 
     /**
-     * @var array
+     * @var array<string,mixed>
      */
     private $paymentMethodsToWidgets;
 
@@ -116,11 +116,17 @@ class PaymentContract
         return $this;
     }
 
+    /**
+     * @return array<string,mixed>
+     */
     public function getPaymentMethodsToWidgets(): array
     {
         return $this->paymentMethodsToWidgets;
     }
 
+    /**
+     * @param array<string,mixed> $paymentMethodsToWidgets
+     */
     public function setPaymentMethodsToWidgets(array $paymentMethodsToWidgets): self
     {
         $this->paymentMethodsToWidgets = $paymentMethodsToWidgets;
@@ -128,6 +134,9 @@ class PaymentContract
         return $this;
     }
 
+    /**
+     * @param array<string,mixed> $config
+     */
     public static function fromConfig(string $identifier, array $config): PaymentContract
     {
         $paymentContract = new PaymentContract();

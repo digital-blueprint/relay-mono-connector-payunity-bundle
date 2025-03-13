@@ -27,7 +27,7 @@ class PayUnityApi implements LoggerAwareInterface
     private $auditLogger;
 
     /**
-     * @var array
+     * @var mixed[]
      */
     private $loggingContext;
 
@@ -44,11 +44,19 @@ class PayUnityApi implements LoggerAwareInterface
         $this->auditLogger = $auditLogger;
     }
 
+    /**
+     * @param mixed[] $loggingContext
+     */
     public function setLoggingContext(array $loggingContext): void
     {
         $this->loggingContext = $loggingContext;
     }
 
+    /**
+     * @param mixed[] $context
+     *
+     * @return mixed[]
+     */
     private function withLoggingContext(array $context = []): array
     {
         return array_merge($this->loggingContext, $context);
@@ -57,10 +65,10 @@ class PayUnityApi implements LoggerAwareInterface
     /**
      * Prepare a checkout. See https://www.payunity.com/reference/parameters#basic.
      *
-     * @param $amount      - Indicates the amount of the payment request. The dot is used as decimal separator.
-     * @param $currency    - The currency code of the payment request's amount (ISO 4217)
-     * @param $paymentType - See PaymentType
-     * @param $extra       - extra key/value pairs passed to the API, see the docs
+     * @param                      $amount      - Indicates the amount of the payment request. The dot is used as decimal separator.
+     * @param                      $currency    - The currency code of the payment request's amount (ISO 4217)
+     * @param                      $paymentType - See PaymentType
+     * @param array<string,string> $extra       - extra key/value pairs passed to the API, see the docs
      */
     public function prepareCheckout(string $amount, string $currency, string $paymentType, array $extra = []): Checkout
     {
@@ -264,7 +272,10 @@ class PayUnityApi implements LoggerAwareInterface
         return $checkout;
     }
 
-    private function anonymizePaymentResponse(array &$data)
+    /**
+     * @param mixed[] $data
+     */
+    private function anonymizePaymentResponse(array &$data): void
     {
         if (array_key_exists('bankAccount', $data)) {
             $this->recursiveAnonymize($data['bankAccount']);
@@ -274,7 +285,10 @@ class PayUnityApi implements LoggerAwareInterface
         }
     }
 
-    private function recursiveAnonymize(array &$array)
+    /**
+     * @param mixed[] $array
+     */
+    private function recursiveAnonymize(array &$array): void
     {
         foreach ($array as $key => $value) {
             if (is_array($value)) {

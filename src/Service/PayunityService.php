@@ -145,6 +145,9 @@ class PayunityService implements LoggerAwareInterface
         }
     }
 
+    /**
+     * @return mixed[]
+     */
     public function getLoggingContext(PaymentPersistence $payment): array
     {
         return ['relay-mono-payment-id' => $payment->getIdentifier()];
@@ -180,6 +183,9 @@ class PayunityService implements LoggerAwareInterface
         return $api->getPaymentScriptSrc($paymentData->getPspIdentifier());
     }
 
+    /**
+     * @param array<string,string> $extra
+     */
     public function prepareCheckout(PaymentPersistence $payment, string $pspContract, string $pspMethod, string $amount, string $currency, string $paymentType, array $extra = []): Checkout
     {
         $existingPaymentData = $this->paymentDataService->getByPaymentIdentifier($payment->getIdentifier());

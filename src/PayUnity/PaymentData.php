@@ -21,7 +21,10 @@ class PaymentData
         return $this->id;
     }
 
-    public function fromJsonResponse(array $jsonResponse)
+    /**
+     * @param mixed[] $jsonResponse
+     */
+    public function fromJsonResponse(array $jsonResponse): void
     {
         $res = $jsonResponse['result'];
         $this->result = new ResultCode($res['code'], $res['description']);
