@@ -50,8 +50,6 @@ class Configuration implements ConfigurationInterface
                                     ->cannotBeEmpty()
                                     ->arrayPrototype()
                                     ->children()
-                                        ->scalarNode('widget_url')
-                                        ->end()
                                         ->scalarNode('template')
                                         ->end()
                                         ->scalarNode('brands')

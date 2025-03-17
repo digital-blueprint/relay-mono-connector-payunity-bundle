@@ -20,15 +20,14 @@ use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\ResultCode;
 use Dbp\Relay\MonoConnectorPayunityBundle\PayUnity\Tools;
 use Dbp\Relay\MonoConnectorPayunityBundle\Persistence\PaymentDataPersistence;
 use Dbp\Relay\MonoConnectorPayunityBundle\Persistence\PaymentDataService;
-use League\Uri\UriTemplate;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\UrlHelper;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\LockInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Uid\Uuid;
 
 class PayunityService implements LoggerAwareInterface
@@ -44,11 +43,6 @@ class PayunityService implements LoggerAwareInterface
      * @var PaymentDataService
      */
     private $paymentDataService;
-
-    /**
-     * @var UrlHelper
-     */
-    private $urlHelper;
 
     /**
      * @var Locale
@@ -68,21 +62,22 @@ class PayunityService implements LoggerAwareInterface
      * @var ConfigurationService
      */
     private $configService;
+    private UrlGeneratorInterface $urlGenerator;
 
     public function __construct(
         PaymentDataService $paymentDataService,
-        UrlHelper $urlHelper,
         Locale $locale,
         LockFactory $lockFactory,
-        ConfigurationService $configService
+        ConfigurationService $configService,
+        UrlGeneratorInterface $urlGenerator,
     ) {
         $this->paymentDataService = $paymentDataService;
-        $this->urlHelper = $urlHelper;
         $this->locale = $locale;
         $this->lockFactory = $lockFactory;
         $this->logger = new NullLogger();
         $this->auditLogger = new NullLogger();
         $this->configService = $configService;
+        $this->urlGenerator = $urlGenerator;
     }
 
     public function setAuditLogger(LoggerInterface $auditLogger): void
@@ -255,17 +250,12 @@ class PayunityService implements LoggerAwareInterface
         $this->updatePaymentStatus($pspContract, $payment);
     }
 
-    public function getWidgetUrl(string $pspContract, string $pspMethod, PaymentPersistence $payment): string
+    public function getWidgetUrl(PaymentPersistence $payment): string
     {
-        $contract = $this->getPaymentContractByIdentifier($pspContract);
-        $widgetConfig = $contract->getPaymentMethodsToWidgets()[$pspMethod];
-
-        $uriTemplate = new UriTemplate($widgetConfig['widget_url']);
-        $uri = (string) $uriTemplate->expand([
+        $uri = $this->urlGenerator->generate('dbp_relay_mono_connector_payunity_bundle', [
             'identifier' => $payment->getIdentifier(),
             'lang' => $this->locale->getCurrentPrimaryLanguage(),
-        ]);
-        $uri = $this->urlHelper->getAbsoluteUrl($uri);
+        ], referenceType: UrlGeneratorInterface::ABSOLUTE_URL);
 
         return $uri;
     }

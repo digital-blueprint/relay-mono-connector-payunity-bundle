@@ -30,7 +30,7 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
     public function start(string $pspContract, string $pspMethod, PaymentPersistence $paymentPersistence): StartResponseInterface
     {
         $this->payunity->startPayment($pspContract, $pspMethod, $paymentPersistence);
-        $widgetUrl = $this->payunity->getWidgetUrl($pspContract, $pspMethod, $paymentPersistence);
+        $widgetUrl = $this->payunity->getWidgetUrl($paymentPersistence);
         $data = null;
         $error = null;
 
