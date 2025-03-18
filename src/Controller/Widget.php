@@ -68,6 +68,31 @@ class Widget extends AbstractController
         $this->auditLogger = $auditLogger;
     }
 
+    /**
+     * @param string[] $brands
+     */
+    public static function getTemplateForBrands(string $method, array $brands): string
+    {
+        // We currently have an apple specific template which is not compatible with others (could it be?)
+        // so error out if someone wants to mix it.
+        $wanted = [];
+        foreach ($brands as $brand) {
+            if ($brand === 'APPLEPAY') {
+                $wanted[$brand] = 'applepay.html.twig';
+            } else {
+                $wanted[$brand] = 'index.html.twig';
+            }
+        }
+        $final = array_unique(array_values($wanted));
+        if (count($final) === 0) {
+            return 'index.html.twig';
+        } elseif (count($final) === 1) {
+            return $final[0];
+        } else {
+            throw new \RuntimeException("Selected brands for method '$method' are not compatible");
+        }
+    }
+
     public function index(Request $request): Response
     {
         $identifier = (string) $request->query->get('identifier');
@@ -78,10 +103,10 @@ class Widget extends AbstractController
 
         $paymentData = $this->paymentDataService->getByPaymentIdentifier($identifier);
         $contractId = $paymentData->getPspContract();
-        $method = $paymentData->getPspMethod();
+        $methodId = $paymentData->getPspMethod();
 
         $contract = $this->configService->getPaymentContractByIdentifier($contractId);
-        $config = $contract->getPaymentMethodsToWidgets()[$method];
+        $method = $contract->getPaymentMethod($methodId);
 
         // payunity supports a list of locales, which more or less match the primary language format,
         // so just use that instead fo hardcoding the list:
@@ -89,11 +114,10 @@ class Widget extends AbstractController
         $puLocale = $this->locale->getCurrentPrimaryLanguage();
 
         $shopperResultUrl = Utils::extendReturnUrl($payment->getPspReturnUrl());
-        $brands = $config['brands'];
         $scriptSrc = $this->payunityService->getPaymentScriptSrc($payment, $paymentData);
         $context = [
             'shopperResultUrl' => $shopperResultUrl,
-            'brands' => $brands,
+            'brands' => $method->getBrands(),
             'scriptSrc' => $scriptSrc,
             'recipient' => $payment->getRecipient(),
             'locale' => $puLocale,
@@ -101,7 +125,8 @@ class Widget extends AbstractController
 
         $loader = new FilesystemLoader(dirname(__FILE__).'/../Resources/views/');
         $twig = new Environment($loader);
-        $template = $twig->load($config['template']);
+        $template = self::getTemplateForBrands($method->getIdentifier(), $method->getBrands());
+        $template = $twig->load($template);
         $content = $template->render($context);
 
         $response = new Response();

@@ -58,13 +58,14 @@ class HealthCheck implements CheckInterface
     public function check(CheckOptions $options): array
     {
         $results = [];
-        foreach ($this->payunity->getContracts() as $contract) {
-            $results[] = $this->checkMethod('Check if we can connect to the PayUnity API ('.$contract.')', [$this->payunity, 'checkConnection'], [$contract->getIdentifier()]);
-        }
 
         $results[] = $this->checkMethod('Check if we can connect to the DB', [$this->dataService, 'checkConnection']);
 
-        $results[] = $this->checkMethod('Check contract config', [$this->config, 'checkConfig']);
+        foreach ($this->payunity->getContracts() as $contract) {
+            $id = $contract->getIdentifier();
+            $results[] = $this->checkMethod('Check contract config ('.$id.')', [$this->config, 'checkConfig'], [$id]);
+            $results[] = $this->checkMethod('Check if we can connect to the PayUnity API ('.$id.')', [$this->payunity, 'checkConnection'], [$id]);
+        }
 
         return $results;
     }

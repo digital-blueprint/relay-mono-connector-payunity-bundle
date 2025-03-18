@@ -40,9 +40,9 @@ class PaymentContract
     private $testMode;
 
     /**
-     * @var array<string,mixed>
+     * @var array<string,PaymentMethod>
      */
-    private $paymentMethodsToWidgets;
+    private $paymentMethods;
 
     public function getIdentifier(): string
     {
@@ -117,21 +117,24 @@ class PaymentContract
     }
 
     /**
-     * @return array<string,mixed>
+     * @param array<string,PaymentMethod> $paymentMethods
      */
-    public function getPaymentMethodsToWidgets(): array
+    public function setPaymentMethods(array $paymentMethods): void
     {
-        return $this->paymentMethodsToWidgets;
+        $this->paymentMethods = $paymentMethods;
     }
 
     /**
-     * @param array<string,mixed> $paymentMethodsToWidgets
+     * @return array<string,PaymentMethod>
      */
-    public function setPaymentMethodsToWidgets(array $paymentMethodsToWidgets): self
+    public function getPaymentMethods(): array
     {
-        $this->paymentMethodsToWidgets = $paymentMethodsToWidgets;
+        return $this->paymentMethods;
+    }
 
-        return $this;
+    public function getPaymentMethod(string $methodId): ?PaymentMethod
+    {
+        return $this->paymentMethods[$methodId] ?? null;
     }
 
     /**
@@ -146,16 +149,15 @@ class PaymentContract
         $paymentContract->setAccessToken((string) $config['access_token']);
         $paymentContract->setWebhookSecret($config['webhook_secret'] ?? '');
         $paymentContract->setTestMode((string) $config['test_mode']);
-        $paymentContract->setPaymentMethodsToWidgets((array) $config['payment_methods_to_widgets']);
+        $paymentMethods = [];
+        foreach ($config['payment_methods'] as $id => $paymentMethodConfig) {
+            $paymentMethod = new PaymentMethod();
+            $paymentMethod->setIdentifier($id);
+            $paymentMethod->setBrands($paymentMethodConfig['brands']);
+            $paymentMethods[$id] = $paymentMethod;
+        }
+        $paymentContract->setPaymentMethods($paymentMethods);
 
         return $paymentContract;
-    }
-
-    /**
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->identifier;
     }
 }

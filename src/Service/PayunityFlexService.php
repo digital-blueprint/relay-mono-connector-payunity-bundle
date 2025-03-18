@@ -74,7 +74,7 @@ class PayunityFlexService implements PaymentServiceProviderServiceInterface, Log
     {
         foreach ($this->payunity->getContracts() as $contract) {
             if ($contract->getIdentifier() === $pspContract) {
-                return array_keys($contract->getPaymentMethodsToWidgets());
+                return array_keys($contract->getPaymentMethods());
             }
         }
 

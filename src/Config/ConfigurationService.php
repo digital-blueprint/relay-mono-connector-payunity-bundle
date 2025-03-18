@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Dbp\Relay\MonoConnectorPayunityBundle\Config;
 
+use Dbp\Relay\MonoConnectorPayunityBundle\Controller\Widget;
+
 class ConfigurationService
 {
     /**
@@ -31,13 +33,20 @@ class ConfigurationService
         return $paymentContract;
     }
 
-    public function checkConfig(): void
+    public function checkConfig(string $contractId): void
     {
         foreach ($this->getPaymentContracts() as $contract) {
-            $secret = $contract->getWebhookSecret();
-            // make sure the secret is in the right format
-            if (@hex2bin($secret) === false) {
-                throw new \RuntimeException('Invalid webhook secret format');
+            if ($contract->getIdentifier() === $contractId) {
+                $secret = $contract->getWebhookSecret();
+                // make sure the secret is in the right format
+                if (@hex2bin($secret) === false) {
+                    throw new \RuntimeException('Invalid webhook secret format');
+                }
+
+                // make sure the template can be dervived from the config
+                foreach ($contract->getPaymentMethods() as $paymentMethod) {
+                    Widget::getTemplateForBrands($paymentMethod->getIdentifier(), $paymentMethod->getBrands());
+                }
             }
         }
     }

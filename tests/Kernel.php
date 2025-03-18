@@ -69,7 +69,7 @@ class Kernel extends BaseKernel
             'database_url' => 'sqlite:///:memory:',
             'payment_contracts' => [
                 'payunity_flex' => [
-                    'payment_methods_to_widgets' => [
+                    'payment_methods' => [
                         'foobar' => [],
                     ],
                 ],
