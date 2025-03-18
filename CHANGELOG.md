@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.2.0
+
+* Various breaking bundle config simplifications:
+
+  * Required options are now enforced, and non-required have better defaults now
+  * Rename `payment_methods_to_widgets` to `payment_methods`
+  * Removed `payment_methods.template`, no longer needed
+  * Removed `payment_methods.widget_url`, no longer needed
+  * Convert `payment_methods.brands` from a space separated string to an array
+
 ## v0.1.28
 
 * Fix method lookup failing in case multiple contracts are configured
