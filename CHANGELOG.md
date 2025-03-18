@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.28
+
+* Fix method lookup failing in case multiple contracts are configured
+  (0.1.27 regression)
+
 ## v0.1.27
 
 * Port to mono-bundle v0.5
