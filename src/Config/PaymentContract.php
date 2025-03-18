@@ -30,12 +30,12 @@ class PaymentContract
     private $accessToken;
 
     /**
-     * @var string
+     * @var ?string
      */
     private $webhookSecret;
 
     /**
-     * @var string
+     * @var ?string
      */
     private $testMode;
 
@@ -49,11 +49,9 @@ class PaymentContract
         return $this->identifier;
     }
 
-    public function setIdentifier(string $identifier): self
+    public function setIdentifier(string $identifier): void
     {
         $this->identifier = $identifier;
-
-        return $this;
     }
 
     public function getApiUrl(): string
@@ -61,11 +59,9 @@ class PaymentContract
         return $this->apiUrl;
     }
 
-    public function setApiUrl(string $apiUrl): self
+    public function setApiUrl(string $apiUrl): void
     {
         $this->apiUrl = $apiUrl;
-
-        return $this;
     }
 
     public function getEntityId(): string
@@ -73,11 +69,9 @@ class PaymentContract
         return $this->entityId;
     }
 
-    public function setEntityId(string $entityId): self
+    public function setEntityId(string $entityId): void
     {
         $this->entityId = $entityId;
-
-        return $this;
     }
 
     public function getAccessToken(): string
@@ -85,35 +79,29 @@ class PaymentContract
         return $this->accessToken;
     }
 
-    public function setAccessToken(string $accessToken): self
+    public function setAccessToken(string $accessToken): void
     {
         $this->accessToken = $accessToken;
-
-        return $this;
     }
 
-    public function getWebhookSecret(): string
+    public function getWebhookSecret(): ?string
     {
         return $this->webhookSecret;
     }
 
-    public function setWebhookSecret(string $webhookSecret): self
+    public function setWebhookSecret(?string $webhookSecret): void
     {
         $this->webhookSecret = $webhookSecret;
-
-        return $this;
     }
 
-    public function getTestMode(): string
+    public function getTestMode(): ?string
     {
         return $this->testMode;
     }
 
-    public function setTestMode(string $testMode): self
+    public function setTestMode(?string $testMode): void
     {
         $this->testMode = $testMode;
-
-        return $this;
     }
 
     /**
@@ -144,11 +132,11 @@ class PaymentContract
     {
         $paymentContract = new PaymentContract();
         $paymentContract->setIdentifier($identifier);
-        $paymentContract->setApiUrl((string) $config['api_url']);
-        $paymentContract->setEntityId((string) $config['entity_id']);
-        $paymentContract->setAccessToken((string) $config['access_token']);
-        $paymentContract->setWebhookSecret($config['webhook_secret'] ?? '');
-        $paymentContract->setTestMode((string) $config['test_mode']);
+        $paymentContract->setApiUrl($config['api_url']);
+        $paymentContract->setEntityId($config['entity_id']);
+        $paymentContract->setAccessToken($config['access_token']);
+        $paymentContract->setWebhookSecret($config['webhook_secret']);
+        $paymentContract->setTestMode($config['test_mode']);
         $paymentMethods = [];
         foreach ($config['payment_methods'] as $id => $paymentMethodConfig) {
             $paymentMethod = new PaymentMethod();

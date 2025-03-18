@@ -7,52 +7,53 @@ Created via `./bin/console config:dump-reference DbpRelayMonoConnectorPayunityBu
 ```yaml
 # Default configuration for "DbpRelayMonoConnectorPayunityBundle"
 dbp_relay_mono_connector_payunity:
-    # The database DSN
-    database_url:         '%env(resolve:DATABASE_URL)%' # Required
-    payment_contracts:    # Required
+  # The database DSN
+  database_url:         '%env(resolve:DATABASE_URL)%' # Required
+  # Zero or more payment contracts. The "payment_contract" can be referenced in the "mono" config.
+  payment_contracts:
+    # Prototype
+    payment_contract:
+      # The PayUnity API endpoint.
+      api_url:              ~ # Required, Example: 'https://eu-test.oppwa.com'
+      # The entityId provided by PayUnity
+      entity_id:            ~ # Required
+      # The access token provided by PayUnity
+      access_token:         ~ # Required
+      # The WebHook secret provided by PayUnity
+      webhook_secret:       null
+      # If an internal or external test system should be used. Only allowed to be set with the test server.
+      test_mode:            null # One of "internal"; "external"
+      # Zero or more payment methods. The "payment_method" can be referenced in the "mono" config.
+      payment_methods:
         # Prototype
-        -
-            # The payunity API endpoint. For example https://eu-test.oppwa.com
-            api_url:              ~
-            # The entityId provided by payunity
-            entity_id:            ~
-            # The access token provided by payunity
-            access_token:         ~
-            # The WebHook secret provided by payunity
-            webhook_secret:       ~
-            # If an internal or external test system should be used. Only allowed to be set with the test server.
-            test_mode:            null # One of "internal"; "external"
-            payment_methods_to_widgets: # Required
-                # Prototype
-                -
-                    template:             ~
-                    brands:               ~
+        payment_method:
+          # A list of payment brands. See the PayUnity documentation for more info.
+          brands:               []
+            # Examples:
+            # - MASTER
+            # - VISA
 ```
 
 Example configuration:
 
 ```yaml
 dbp_relay_mono_connector_payunity:
-  database_url: '%env(resolve:DATABASE_URL)%'
+  database_url: '%env(DATABASE_URL)%'
   payment_contracts:
     payunity_flex_studienservice:
-      api_url: '%env(resolve:MONO_CONNECTOR_PAYUNITY_API_URL)%'
+      api_url: '%env(MONO_CONNECTOR_PAYUNITY_API_URL)%'
       entity_id: '%env(MONO_CONNECTOR_PAYUNITY_ENTITY_ID)%'
       access_token: '%env(MONO_CONNECTOR_PAYUNITY_ACCESS_TOKEN)%'
       webhook_secret: '%env(MONO_CONNECTOR_PAYUNITY_WEBHOOK_SECRET)%'
-      payment_methods_to_widgets:
-        payunity_creditcard:
-          template: 'index.html.twig'
-          brands: 'AMEX DINERS DISCOVER JCB MASTER VISA'
-        payunity_applepay:
-          template: 'applepay.html.twig'
-          brands: 'APPLEPAY'
-        payunity_googlepay:
-          template: 'index.html.twig'
-          brands: 'GOOGLEPAY'
-        payunity_sofortueberweisung:
-          template: 'index.html.twig'
-          brands: 'SOFORTUEBERWEISUNG'
+      payment_methods:
+        creditcard:
+          brands: ['AMEX', 'DINERS', 'DISCOVER', 'JCB', 'MASTER', 'VISA']
+        applepay:
+          brands: ['APPLEPAY']
+        googlepay:
+          brands: ['GOOGLEPAY']
+        sofortueberweisung:
+          brands: ['SOFORTUEBERWEISUNG']
 ```
 
 ## Test Mode

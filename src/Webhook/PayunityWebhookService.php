@@ -40,7 +40,11 @@ class PayunityWebhookService implements LoggerAwareInterface
     {
         $ivLen = \openssl_cipher_iv_length('aes-256-gcm');
         $iv = \openssl_random_pseudo_bytes($ivLen);
-        $key = @hex2bin($paymentContract->getWebhookSecret());
+        $secret = $paymentContract->getWebhookSecret();
+        if ($secret === null) {
+            throw new \RuntimeException('secret not set');
+        }
+        $key = @hex2bin($secret);
         if ($key === false) {
             throw new \RuntimeException('invalid secret');
         }
@@ -86,7 +90,11 @@ class PayunityWebhookService implements LoggerAwareInterface
             throw new BadRequestHttpException('Invalid request body');
         }
 
-        $key = @hex2bin($paymentContract->getWebhookSecret());
+        $secret = $paymentContract->getWebhookSecret();
+        if ($secret === null) {
+            throw new \RuntimeException('secret not set');
+        }
+        $key = @hex2bin($secret);
         if ($key === false) {
             throw new \RuntimeException('invalid secret');
         }

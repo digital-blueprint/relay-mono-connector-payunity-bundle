@@ -68,10 +68,12 @@ class WebhookCommand extends Command
                 UrlGeneratorInterface::ABSOLUTE_URL);
             $output->writeln("Webhook URL for PayUnity:\n\n".$webhookUrl);
 
-            // To allow users to test their setup, give them a curl command faking a webhook test call
-            if ($contract->getWebhookSecret() === '') {
+            if ($contract->getWebhookSecret() === null) {
+                // No secret set, we can't fake a test call
                 return Command::SUCCESS;
             }
+
+            // To allow users to test their setup, give them a curl command faking a webhook test call
             $output->writeln('');
 
             $jsonPayload = '{"type": "test", "action": "webhook activation", "payload": {}}';

@@ -39,7 +39,7 @@ class ConfigurationService
             if ($contract->getIdentifier() === $contractId) {
                 $secret = $contract->getWebhookSecret();
                 // make sure the secret is in the right format
-                if (@hex2bin($secret) === false) {
+                if ($secret !== null && @hex2bin($secret) === false) {
                     throw new \RuntimeException('Invalid webhook secret format');
                 }
 
