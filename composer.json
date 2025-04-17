@@ -7,7 +7,6 @@
         "php": ">=8.2",
         "ext-intl": "*",
         "ext-json": "*",
-        "api-platform/core": "^3.2",
         "dbp/relay-core-bundle": "^0.1.186",
         "dbp/relay-mono-bundle": "^0.5.0",
         "league/uri": "^6.5 || ^7.4",
