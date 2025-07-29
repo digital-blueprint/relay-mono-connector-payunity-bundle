@@ -1,5 +1,8 @@
 # DbpRelayMonoConnectorPayunityBundle
 
+> [!IMPORTANT]
+> With PayUnity shutting down we have stopped supporting this bundle
+
 [GitHub](https://github.com/digital-blueprint/relay-mono-connector-payunity-bundle) |
 [Packagist](https://packagist.org/packages/dbp/relay-mono-connector-payunity-bundle)
 
